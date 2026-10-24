@@ -15,16 +15,17 @@ namespace Sec2_Group1_HappyJumpingFrog
     public partial class FormGame : Form
     {
         // ==========================================
-        // ประกาศตัวแปรระดับคลาส (เพื่อให้ทุกฟังก์ชันเข้าถึงได้)
+        // ประกาศตัวแปรระดับคลาส
         // ==========================================
-        private River river;                    // ตัวแปรสำหรับจัดการแม่น้ำและปลา/มอนสเตอร์ในน้ำ
+        private List<TargetLotus> _lotuses = new List<TargetLotus>(); // ลิสต์เก็บดอกบัวทั้ง 5 ดอก
+        private River river;                    // ตัวแปรสำหรับจัดการแม่น้ำและปลา
         private PlayerFrog player;              // ตัวแปรผู้เล่น (กบ)
-        private const int WorldHeight = 650;   // กำหนดความสูงของพื้นที่เกม (ค่าคงที่)
+        private const int WorldHeight = 650;   // กำหนดความสูงของพื้นที่เกม
         private const int PanelWidth = 160;    // ความกว้างของแถบเมนูด้านขวา
         private const int ButtonSize = 64;     // ขนาดของปุ่มกดบนแผงด้านขวา
 
         private float _scale = 1f;             // สเกลอัตราส่วนย่อ/ขยายหน้าจอ
-        private int _fieldWidth = 750;         // ความกว้างของพื้นที่เล่นเกม (ปรับตามขนาดหน้าต่าง)
+        private int _fieldWidth = 750;         // ความกว้างของพื้นที่เล่นเกม
 
         private PlayerFrog _frog;              // ตัวละครกบที่ใช้งานจริง
         private Image _background;             // รูปภาพพื้นหลังเกม
@@ -33,7 +34,7 @@ namespace Sec2_Group1_HappyJumpingFrog
         // ข้อมูลสถานะเกมบนแถบด้านขวา
         private int _level = 1;                // ด่านปัจจุบัน
         private int _score = 0;                // คะแนน
-        private int _goal = 0;                 // เป้าหมาย
+        private int _goal = 0;                 // เป้าหมาย (จำนวนดอกบัวที่เก็บได้)
         private bool _paused = false;          // สถานะหยุดเกมชั่วคราว
         private bool _soundOn = true;          // สถานะเปิด/ปิดเสียงเอฟเฟกต์
         private bool _musicOn = true;          // สถานะเปิด/ปิดเพลงประกอบ
@@ -50,7 +51,7 @@ namespace Sec2_Group1_HappyJumpingFrog
         {
             InitializeComponent();
 
-            DoubleBuffered = true;               // เปิดระบบลดการกะพริบของหน้าจอขณะวาด กราฟิก
+            DoubleBuffered = true;               // เปิดระบบลดการกะพริบของหน้าจอขณะวาดกราฟิก
             ResizeRedraw = true;                 // สั่งให้วาดหน้าจอใหม่ทันทีที่มีการปรับขนาดหน้าต่าง
             KeyPreview = true;                   // ให้ Form ดักจับการกดคีย์บอร์ดก่อน Control อื่น
             ClientSize = new Size(750 + PanelWidth, WorldHeight); // กำหนดขนาดหน้าต่างเกม
@@ -63,18 +64,36 @@ namespace Sec2_Group1_HappyJumpingFrog
                 new Image[] { Properties.Resources.enemy1, Properties.Resources.enemy2 },
                 2f, _fieldWidth); // สร้างถนนและศัตรูวิ่งบนถนน
 
-            // *** สร้างวัตถุแม่น้ำตรงนี้ เพื่อให้พร้อมใช้งานทันทีและปลาไม่เป็น null ***
+            // สร้างวัตถุแม่น้ำ
             river = new River(_fieldWidth);
 
+            // *** สร้างดอกบัว 5 ดอก วางกระจายบนพื้นหญ้าด้านบน ***
+            Image lotusImg = Properties.Resources.lotus;
+            float lotusWidth = 110f;   // 📍 ขนาดความกว้างดอกบัว (ปรับเพิ่ม/ลดขนาดได้ที่นี่)
+            float lotusHeight = 70f;  // 📍 ขนาดความสูงดอกบัว
+            float padding = 25f;      // 📍 ระยะเว้นขอบซ้าย-ขวา
+
+            // คำนวณระยะห่างเพื่อกระจายดอกบัวให้เต็มพื้นที่สนามเล่น
+            float availableWidth = _fieldWidth - (padding * 2) - lotusWidth;
+            float step = availableWidth / 4f; // แบ่งช่วงระยะห่าง 4 ช่องเท่า ๆ กัน
+
+            _lotuses.Clear();
+            for (int i = 0; i < 5; i++)
+            {
+                float x = padding + (i * step);
+                float y = 10; // พิกัด Y บนพื้นหญ้าด้านบนสุด
+                _lotuses.Add(new TargetLotus(lotusImg, x, y, lotusWidth, lotusHeight));
+            }
+
             // ตั้งค่าเวลาในการอัปเดตเกม (เฟรมเรต)
-            timerGame.Interval = 16;             // ประมาณ 60 FPS (1000ms / 60 ≈ 16ms)
-            timerGame.Start();                   // เริ่มให้ตัวนับเวลาทำงาน
+            timerGame.Interval = 16;             // ประมาณ 60 FPS
+            timerGame.Start();                   // เริ่มตัวนับเวลา
         }
 
         // คำนวณขอบเขตพื้นที่เล่นเกมเมื่อมีการปรับขนาดหน้าต่าง
         private void UpdateLayout()
         {
-            if (ClientSize.Height <= 0) return;   // ป้องกันข้อผิดพลาดตอนย่อหน้าต่างลง Taskbar
+            if (ClientSize.Height <= 0) return;
 
             _scale = ClientSize.Height / (float)WorldHeight;
             float worldWidth = ClientSize.Width / _scale;
@@ -85,12 +104,11 @@ namespace Sec2_Group1_HappyJumpingFrog
                 _frog.X = _fieldWidth - _frog.Width;
         }
 
-        // ทำงานอัตโนมัติเมื่อผู้ใช้ขยายหรือย่อหน้าต่าง
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
-            UpdateLayout();                      // คำนวณตำแหน่งใหม่
-            Invalidate();                        // สั่งให้วาดหน้าจอใหม่
+            UpdateLayout();
+            Invalidate();
         }
 
         // ==========================================
@@ -100,28 +118,34 @@ namespace Sec2_Group1_HappyJumpingFrog
         {
             base.OnPaint(e);
             Graphics g = e.Graphics;
-            g.SmoothingMode = SmoothingMode.AntiAlias; // ปรับให้ภาพลบรอยหยักเพื่อความเรียบเนียน
-            g.ScaleTransform(_scale, _scale);          // ปรับขนาดกราฟิกตามสเกลหน้าจอ
+            g.SmoothingMode = SmoothingMode.AntiAlias; // ปรับภาพให้ลบรอยหยัก
+            g.ScaleTransform(_scale, _scale);          // ปรับขนาดตามสเกลหน้าจอ
 
-            // 1. วาดรูปพื้นหลังก่อนเสมอ (อยู่ชั้นล่างสุด)
+            // 1. วาดรูปพื้นหลังก่อนเสมอ
             g.DrawImage(_background, 0, 0, _fieldWidth, WorldHeight);
 
-            // 2. *** วาดปลา/มอนสเตอร์ในแม่น้ำทับบนรูปพื้นหลัง ***
-            if (river != null)
+            // 2. *** วาดดอกบัว 5 ดอกบนหญ้าด้านบน ***
+            foreach (var lotus in _lotuses)
             {
-                river.Draw(g); // เรียกเมธอด Draw ของ class River เพื่อวาดปลาทุกตัวในลิสต์
+                lotus.Draw(g);
             }
 
-            // 3. วาดถนนและศัตรูบนถนน
+            // 3. วาดปลาและแม่น้ำ
+            if (river != null)
+            {
+                river.Draw(g);
+            }
+
+            // 4. วาดถนนและศัตรูบนถนน
             _road.Draw(g);
 
-            // 4. วาดตัวละครกบของผู้เล่น
+            // 5. วาดตัวละครกบของผู้เล่น
             _frog.Draw(g);
 
-            // 5. วาดเมนูแผงควบคุมด้านขวา
+            // 6. วาดเมนูแผงควบคุมด้านขวา
             DrawSidePanel(g);
 
-            // 6. แสดงข้อความ PAUSED หากเกมถูกหยุดชั่วคราว
+            // 7. แสดงข้อความ PAUSED หากเกมถูกหยุดชั่วคราว
             if (_paused)
                 DrawCenteredText(g, "PAUSED", _titleFont, _fieldWidth / 2f, WorldHeight / 2f - 15);
         }
@@ -133,14 +157,13 @@ namespace Sec2_Group1_HappyJumpingFrog
             using (LinearGradientBrush bg = new LinearGradientBrush(
                 panel, Color.FromArgb(150, 200, 240), Color.FromArgb(90, 150, 210), 90f))
             {
-                g.FillRectangle(bg, panel); // วาดพื้นหลังแผงด้านขวาแบบไล่เฉดสี
+                g.FillRectangle(bg, panel);
             }
             using (Pen border = new Pen(Color.Goldenrod, 6))
             {
-                g.DrawRectangle(border, _fieldWidth + 3, 3, PanelWidth - 6, WorldHeight - 6); // วาดกรอบทอง
+                g.DrawRectangle(border, _fieldWidth + 3, 3, PanelWidth - 6, WorldHeight - 6);
             }
 
-            // แสดงข้อความข้อมูลในเกม
             float cx = _fieldWidth + PanelWidth / 2f;
             DrawCenteredText(g, "Level:", _titleFont, cx, 20);
             DrawCenteredText(g, _level + "/3", _valueFont, cx, 55);
@@ -151,31 +174,27 @@ namespace Sec2_Group1_HappyJumpingFrog
             DrawCenteredText(g, "Lives:", _titleFont, cx, 260);
             DrawCenteredText(g, _frog.Lives.ToString(), _valueFont, cx, 295);
 
-            // วาดปุ่มกดต่างๆ
-            DrawButton(g, ButtonRect(0), _paused ? ">" : "II", true); // ปุ่ม Pause / Play
-            DrawButton(g, ButtonRect(1), "SFX", _soundOn);            // ปุ่มเสียงเอฟเฟกต์
-            DrawButton(g, ButtonRect(2), "BGM", _musicOn);             // ปุ่มเพลงประกอบ
+            DrawButton(g, ButtonRect(0), _paused ? ">" : "II", true);
+            DrawButton(g, ButtonRect(1), "SFX", _soundOn);
+            DrawButton(g, ButtonRect(2), "BGM", _musicOn);
         }
 
-        // คำนวณตำแหน่งพิกัดของปุ่มกดบนแผงขวา
         private RectangleF ButtonRect(int index)
         {
             float x = _fieldWidth + (PanelWidth - ButtonSize) / 2f;
             return new RectangleF(x, 360 + index * 80, ButtonSize, ButtonSize);
         }
 
-        // วาดรูปปุ่มทรงกลม
         private void DrawButton(Graphics g, RectangleF r, string text, bool active)
         {
             using (SolidBrush fill = new SolidBrush(Color.FromArgb(110, 190, 50)))
             using (Pen edge = new Pen(Color.FromArgb(50, 110, 20), 4))
             {
-                g.FillEllipse(fill, r);   // วาดสีข้างในปุ่ม
-                g.DrawEllipse(edge, r);   // วาดเส้นขอบปุ่ม
+                g.FillEllipse(fill, r);
+                g.DrawEllipse(edge, r);
             }
             DrawCenteredText(g, text, _smallFont, r.X + r.Width / 2f, r.Y + r.Height / 2f - 9);
 
-            // ถ้าสถานะเป็นปิด ให้ขีดเส้นสีแดงทับปุ่ม
             if (!active)
             {
                 using (Pen slash = new Pen(Color.Red, 5))
@@ -185,55 +204,50 @@ namespace Sec2_Group1_HappyJumpingFrog
             }
         }
 
-        // ฟังก์ชันช่วยจัดข้อความให้อยู่ตรงกลางตำแหน่งที่กำหนด
         private void DrawCenteredText(Graphics g, string text, Font font, float centerX, float y)
         {
             using (StringFormat sf = new StringFormat())
             {
                 sf.Alignment = StringAlignment.Center;
-                g.DrawString(text, font, Brushes.Black, centerX + 1.5f, y + 1.5f, sf); // วาดเงาข้อความ
-                g.DrawString(text, font, Brushes.White, centerX, y, sf);               // วาดตัวหนังสือจริง
+                g.DrawString(text, font, Brushes.Black, centerX + 1.5f, y + 1.5f, sf);
+                g.DrawString(text, font, Brushes.White, centerX, y, sf);
             }
         }
 
-        // ดักจับการคลิกเมาส์บนปุ่มเมนู
         protected override void OnMouseClick(MouseEventArgs e)
         {
             base.OnMouseClick(e);
-            PointF p = new PointF(e.X / _scale, e.Y / _scale); // แปลงพิกัดเมาส์ตามสเกล
+            PointF p = new PointF(e.X / _scale, e.Y / _scale);
 
-            if (ButtonRect(0).Contains(p)) TogglePause();      // คลิกปุ่ม Pause
-            else if (ButtonRect(1).Contains(p)) _soundOn = !_soundOn; // คลิกเปิด/ปิด SFX
-            else if (ButtonRect(2).Contains(p)) _musicOn = !_musicOn; // คลิกเปิด/ปิด BGM
+            if (ButtonRect(0).Contains(p)) TogglePause();
+            else if (ButtonRect(1).Contains(p)) _soundOn = !_soundOn;
+            else if (ButtonRect(2).Contains(p)) _musicOn = !_musicOn;
 
-            Invalidate(); // สั่งรีเฟรชหน้าจอ
+            Invalidate();
         }
 
-        // สลับสถานะหยุดเกม / เล่นต่อ
         private void TogglePause()
         {
             _paused = !_paused;
-            timerGame.Enabled = !_paused; // ปิด/เปิด ตัวนับเวลา
+            timerGame.Enabled = !_paused;
         }
 
-        // ดักจับการกดปุ่มบนคีย์บอร์ด (เช่น ปุ่มลูกศรบังคับกบ หรือปุ่ม P)
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            if (keyData == Keys.P) // กด P เพื่อ Pause
+            if (keyData == Keys.P)
             {
                 TogglePause();
                 Invalidate();
                 return true;
             }
 
-            // บังคับกบด้วยปุ่มลูกศร ขึ้น ลง ซ้าย ขวา
             if (keyData == Keys.Up || keyData == Keys.Down ||
                 keyData == Keys.Left || keyData == Keys.Right)
             {
                 if (!_paused)
                 {
-                    _frog.Hop(keyData, _fieldWidth, WorldHeight); // สั่งกบกระโดด
-                    Invalidate(); // รีเฟรชภาพ
+                    _frog.Hop(keyData, _fieldWidth, WorldHeight);
+                    Invalidate();
                 }
                 return true;
             }
@@ -241,7 +255,7 @@ namespace Sec2_Group1_HappyJumpingFrog
         }
 
         // ==========================================
-        // ฟังก์ชัน Timer ทำงานตามรอบเวลา (อัปเดตตำแหน่งและการเคลื่อนที่)
+        // ฟังก์ชัน Timer ทำงานตามรอบเวลา (อัปเดตสถานะเกม)
         // ==========================================
         private void timerGame_Tick(object sender, EventArgs e)
         {
@@ -260,8 +274,8 @@ namespace Sec2_Group1_HappyJumpingFrog
             }
 
             // 2. ตรวจจับกบตกแม่น้ำ / เหยียบปลา
-            int riverTop = 100;     // ขอบบนแม่น้ำ (ปรับตามรูปจริง)
-            int riverBottom = 250; // ขอบล่างแม่น้ำ (ปรับตามรูปจริง)
+            int riverTop = 100;    // ขอบบนแม่น้ำ
+            int riverBottom = 250; // ขอบล่างแม่น้ำ
 
             if (_frog.Y >= riverTop && _frog.Y <= riverBottom)
             {
@@ -286,7 +300,32 @@ namespace Sec2_Group1_HappyJumpingFrog
                 }
             }
 
-            // 3. เช็กสถานะ Game Over
+            // 3. *** [เพิ่มระบบ] ตรวจจับกบเดินไปเก็บดอกบัว ***
+            foreach (var lotus in _lotuses)
+            {
+                // ถ้าดอกบัวยังไม่ถูกเก็บ และตัวกบกระโดดไปชน/ทับดอกบัว
+                if (!lotus.IsCollected && _frog.Intersects(lotus))
+                {
+                    lotus.IsCollected = true; // ซ่อนดอกบัวดอกนี้ทันที
+                    _goal++;                  // เพิ่มจำนวนที่เก็บได้บนแถบขวา (Goal: x/5)
+                    _score += 100;            // บวกคะแนนเพิ่ม 100 คะแนน
+
+                    // วาร์ปกบกลับไปเริ่มใหม่ที่จุดเริ่มต้นด้านล่าง
+                    _frog.X = 350;
+                    _frog.Y = 600;
+
+                    // หากเก็บครบ 5 ดอก -> แสดงความยินดีและจบด่าน
+                    if (_goal >= 5)
+                    {
+                        timerGame.Stop();
+                        MessageBox.Show("You Win! คุณผ่านด่านเรียบร้อยแล้ว!", "Congratulations");
+                        Close();
+                    }
+                    break;
+                }
+            }
+
+            // 4. เช็กสถานะ Game Over (พลังชีวิตหมด)
             if (_frog.IsGameOver)
             {
                 timerGame.Stop();
@@ -294,13 +333,11 @@ namespace Sec2_Group1_HappyJumpingFrog
                 Close();
             }
 
-            Invalidate();
+            Invalidate(); // สั่งรีเฟรชหน้าจอ
         }
 
-        // Event Handler เมื่อ Form โหลดเสร็จ
         private void FormGame_Load(object sender, EventArgs e)
         {
-            // (ย้ายโค้ดสร้าง river ไปไว้ใน FormGame() แล้ว)
         }
     }
 }
