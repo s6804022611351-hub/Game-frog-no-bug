@@ -13,6 +13,7 @@ namespace Sec2_Group1_HappyJumpingFrog.Class
        
         public FriendMonster(Image sprite, float x, float y, float speed, int areaWidth)
             : base(sprite, x, y, 100, 40) // 100, 40 คือความกว้างและสูงของมอนสเตอร์
+
         {
             SwimSpeed = speed;
             _areaWidth = areaWidth;

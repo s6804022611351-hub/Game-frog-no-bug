@@ -136,13 +136,13 @@
   <data name="background" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\84018898-a6ff-499a-8ca9-1531b69cb3b6.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-    <data name="Fish1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-		<value>..\Resources\Gemini_Generated_Image_81076c81076c8107_2-removebg-preview.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-	</data>
-	<data name="Fish2" type="System.Resources.ResXFileRef, System.Windows.Forms">
-		<value>..\Resources\Gemini_Generated_Image_4tua4t4tua4t4tua_2-removebg-preview.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-	</data>
-	<data name="BackgroundFormMenu" type="System.Resources.ResXFileRef, System.Windows.Forms">
-		<value>..\Resources\file_000000006eec8207be7526100ac35e66.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-	</data>
+  <data name="BackgroundFormMenu" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\file_000000006eec8207be7526100ac35e66.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Fish2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Gemini_Generated_Image_4tua4t4tua4t4tua_2-removebg-preview.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Fish1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Fish1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

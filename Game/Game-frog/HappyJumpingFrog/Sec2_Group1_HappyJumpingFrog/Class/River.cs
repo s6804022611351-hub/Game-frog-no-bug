@@ -10,18 +10,29 @@ namespace Sec2_Group1_HappyJumpingFrog.Class
 
         public River(int formWidth)
         {
-            // === ดึงรูปภาพที่คุณเพิ่งอัปโหลดมาใช้งานตรงนี้ ===
-            // (เปลี่ยน enemy1 หรือ enemy2 เป็นชื่อรูปภาพที่คุณเพิ่งเพิ่มเข้าไป)
-            Image monsterImg1 = Properties.Resources.enemy1;
-            Image monsterImg2 = Properties.Resources.enemy2;
+            // ดึงรูป Fish1 และ Fish2 (ตัวพิมพ์ใหญ่ F)
+            Image fish1 = Properties.Resources.Fish1;
+            Image fish2 = Properties.Resources.Fish2;
 
-            // สปอว์นมอนสเตอร์เลนที่ 1 (วิ่งไปทางขวา)
-            Friends.Add(new FriendMonster(monsterImg1, 0, 120, 3f, formWidth));
-            Friends.Add(new FriendMonster(monsterImg1, 250, 120, 3f, formWidth));
+            // ==========================================
+            // เลนที่ 1 (เลนบนสุด): Fish1 วิ่งไปทางขวา (Y = 110)
+            // ==========================================
+            Friends.Add(new FriendMonster(fish1, 50, 110, 2f, formWidth));
+            Friends.Add(new FriendMonster(fish1, 350, 110, 2f, formWidth));
+            Friends.Add(new FriendMonster(fish1, 650, 110, 2f, formWidth));
 
-            // สปอว์นมอนสเตอร์เลนที่ 2 (วิ่งไปทางซ้าย)
-            Friends.Add(new FriendMonster(monsterImg2, 100, 180, -2f, formWidth));
-            Friends.Add(new FriendMonster(monsterImg2, 350, 180, -2f, formWidth));
+            // ==========================================
+            // เลนที่ 2 (ตรงกลาง): Fish2 วิ่งไปทางซ้าย (Y = 180)
+            // ==========================================
+            Friends.Add(new FriendMonster(fish2, 200, 180, -3f, formWidth));
+            Friends.Add(new FriendMonster(fish2, 550, 180, -3f, formWidth));
+
+            // ==========================================
+            // เลนที่ 3 (เลนล่างสุด): Fish1 วิ่งไปทางขวา (Y = 250)
+            // ==========================================
+            Friends.Add(new FriendMonster(fish1, 180, 250, 2.5f, formWidth));
+            Friends.Add(new FriendMonster(fish1, 500, 250, 2.5f, formWidth));
+            Friends.Add(new FriendMonster(fish1, 750, 250, 2.5f, formWidth));
         }
 
         public void Draw(Graphics g)
