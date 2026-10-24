@@ -24,6 +24,18 @@ namespace Sec2_Group1_HappyJumpingFrog
         private const int PanelWidth = 160;    // ความกว้างของแถบเมนูด้านขวา
         private const int ButtonSize = 64;     // ขนาดของปุ่มกดบนแผงด้านขวา
 
+        // ค่าคงที่ของถนน (ปรับให้ตรงกับรูปพื้นหลัง)
+        private const float RoadTop = 358;     // ขอบบนของถนน
+        private const float LaneHeight = 62;   // ความสูงต่อเลน
+
+        // [แก้] แถวของแม่น้ำ (ตรงกับตาราง RowCenters ใน PlayerFrog)
+        private const int RiverFirstRow = 5;   // แถวแม่น้ำแถวแรก
+        private const int RiverLastRow = 7;    // แถวแม่น้ำแถวสุดท้าย
+
+        // [แก้] จุดเริ่มต้นของกบ (กึ่งกลางแถวล่างสุดพอดี)
+        private const float StartX = 350;
+        private const float StartY = 565;
+
         private float _scale = 1f;             // สเกลอัตราส่วนย่อ/ขยายหน้าจอ
         private int _fieldWidth = 750;         // ความกว้างของพื้นที่เล่นเกม
 
@@ -59,10 +71,14 @@ namespace Sec2_Group1_HappyJumpingFrog
 
             // โหลดรูปภาพและสร้างวัตถุเกมต่าง ๆ
             _background = Properties.Resources.background; // ดึงรูปพื้นหลัง
-            _frog = new PlayerFrog(Properties.Resources.frog, 350, 600); // สร้างกบที่พิกัดเริ่มต้น
-            _road = new Road(7, 3,
+
+            // [แก้] สร้างกบที่จุดเริ่มต้น (ใช้ค่าคงที่ StartX, StartY)
+            _frog = new PlayerFrog(Properties.Resources.frog, StartX, StartY);
+
+            // สร้างถนนและศัตรูโดยระบุขอบบนถนนกับความสูงเลน
+            _road = new Road(RoadTop, LaneHeight, 3,
                 new Image[] { Properties.Resources.enemy1, Properties.Resources.enemy2 },
-                2f, _fieldWidth); // สร้างถนนและศัตรูวิ่งบนถนน
+                2f, _fieldWidth);
 
             // สร้างวัตถุแม่น้ำ
             river = new River(_fieldWidth);
@@ -100,6 +116,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             _fieldWidth = Math.Max(300, (int)(worldWidth - PanelWidth));
 
             if (_road != null) _road.SetAreaWidth(_fieldWidth);
+            if (river != null) river.SetAreaWidth(_fieldWidth);
             if (_frog != null && _frog.X > _fieldWidth - _frog.Width)
                 _frog.X = _fieldWidth - _frog.Width;
         }
@@ -232,7 +249,22 @@ namespace Sec2_Group1_HappyJumpingFrog
             timerGame.Enabled = !_paused;
         }
 
-        
+        // [แก้] หาปลาที่อยู่เลนเดียวกับกบ และอยู่ใต้กึ่งกลางตัวกบพอดี
+        private FriendMonster FindFishUnderFrog()
+        {
+            if (river == null) return null;
+
+            float fx = _frog.X + _frog.Width / 2f;
+            float fy = _frog.Y + _frog.Height / 2f;
+
+            foreach (FriendMonster fish in river.Friends)
+            {
+                float cy = fish.Y + fish.Height / 2f;
+                if (Math.Abs(cy - fy) < 20 && fx >= fish.X && fx <= fish.X + fish.Width)
+                    return fish;
+            }
+            return null;
+        }
 
         // ==========================================
         // ฟังก์ชัน Timer ทำงานตามรอบเวลา (อัปเดตสถานะเกม)
@@ -253,32 +285,20 @@ namespace Sec2_Group1_HappyJumpingFrog
                 }
             }
 
-            // 2. ตรวจจับกบตกแม่น้ำ / เหยียบปลา
-            int riverTop = 100;    // ขอบบนแม่น้ำ
-            int riverBottom = 250; // ขอบล่างแม่น้ำ
-
-            if (_frog.Y >= riverTop && _frog.Y <= riverBottom)
+            // 2. [แก้] ตรวจจับกบตกแม่น้ำ / ขี่ปลา
+            int row = _frog.CurrentRow;
+            if (row >= RiverFirstRow && row <= RiverLastRow)
             {
-                bool isOnFish = false;
-
-                if (river != null)
-                {
-                    foreach (FriendMonster fish in river.Friends)
-                    {
-                        if (_frog.Intersects(fish))
-                        {
-                            isOnFish = true;
-                            _frog.X += fish.SwimSpeed; // กบลอยตามปลา
-                            break;
-                        }
-                    }
-                }
-
-                if (!isOnFish)
-                {
-                    _frog.Die(); // ตกน้ำตาย
-                }
+                FriendMonster fish = FindFishUnderFrog();
+                if (fish != null)
+                    _frog.X += fish.SwimSpeed;   // กบลอยตามปลา
+                else
+                    _frog.Die();                 // ตกน้ำ
             }
+
+            // [แก้] ถูกปลาพัดออกนอกจอ
+            if (_frog.X < -_frog.Width / 2f || _frog.X > _fieldWidth - _frog.Width / 2f)
+                _frog.Die();
 
             // 3. *** [เพิ่มระบบ] ตรวจจับกบเดินไปเก็บดอกบัว ***
             foreach (var lotus in _lotuses)
@@ -288,11 +308,11 @@ namespace Sec2_Group1_HappyJumpingFrog
                 {
                     lotus.IsCollected = true; // ซ่อนดอกบัวดอกนี้ทันที
                     _goal++;                  // เพิ่มจำนวนที่เก็บได้บนแถบขวา (Goal: x/5)
-                    _score += 1;            // บวกคะแนนเพิ่ม 1คะแนน
+                    _score += 1;              // บวกคะแนนเพิ่ม 1 คะแนน
 
-                    // วาร์ปกบกลับไปเริ่มใหม่ที่จุดเริ่มต้นด้านล่าง
-                    _frog.X = 350;
-                    _frog.Y = 600;
+                    // [แก้] วาร์ปกบกลับไปเริ่มใหม่ที่จุดเริ่มต้นด้านล่าง
+                    _frog.X = StartX;
+                    _frog.Y = StartY;
 
                     // หากเก็บครบ 5 ดอก -> แสดงความยินดีและจบด่าน
                     if (_goal >= 5)
@@ -310,7 +330,6 @@ namespace Sec2_Group1_HappyJumpingFrog
             {
                 timerGame.Stop();
 
-
                 // สร้างหน้า Game Over พร้อมส่งคะแนน _score ไปแสดงผล
                 FormGameOver gameOverForm = new FormGameOver(_score);
 
@@ -326,8 +345,7 @@ namespace Sec2_Group1_HappyJumpingFrog
 
             Invalidate(); // สั่งรีเฟรชหน้าจอ
         }
-        
-        
+
         private void CollectLotusByIndex(int index)
         {
             if (index >= 0 && index < _lotuses.Count)
@@ -340,9 +358,9 @@ namespace Sec2_Group1_HappyJumpingFrog
                     _goal++;
                     _score += 100;
 
-                    // วาร์ปกบกลับจุดเริ่มต้นด้านล่าง
-                    _frog.X = 350;
-                    _frog.Y = 600;
+                    // [แก้] วาร์ปกบกลับจุดเริ่มต้นด้านล่าง
+                    _frog.X = StartX;
+                    _frog.Y = StartY;
 
                     Invalidate();
 
@@ -356,7 +374,6 @@ namespace Sec2_Group1_HappyJumpingFrog
             }
         }
 
-        // 📍 วาง ProcessCmdKey ต่อท้ายลงมาได้เลย
         // ==========================================
         // ดักจับการกดคีย์บอร์ด (P, Z, X, C, V, B, ปุ่มลูกศร และ WASD)
         // ==========================================
@@ -370,7 +387,7 @@ namespace Sec2_Group1_HappyJumpingFrog
                 return true;
             }
 
-            // 2. กด Z, X, C, V, B เพื่อวาร์ปเก็บดอกบัวดอกที่ 1-5
+            // 2. กด Z, X, C, V, B เพื่อวาร์ปเก็บดอกบัวดอกที่ 1-5 (ปุ่มทดสอบ ลบก่อนส่งงาน)
             if (!_paused)
             {
                 if (keyData == Keys.Z) { CollectLotusByIndex(0); return true; }
@@ -401,6 +418,7 @@ namespace Sec2_Group1_HappyJumpingFrog
 
             return base.ProcessCmdKey(ref msg, keyData);
         }
+
         private void FormGame_Load(object sender, EventArgs e)
         {
         }
