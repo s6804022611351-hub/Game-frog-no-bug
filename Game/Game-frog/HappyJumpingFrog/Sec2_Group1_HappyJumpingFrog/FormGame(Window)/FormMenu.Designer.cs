@@ -42,9 +42,10 @@
             btnplay.Cursor = Cursors.IBeam;
             btnplay.Font = new Font("Palatino Linotype", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnplay.ForeColor = Color.MidnightBlue;
-            btnplay.Location = new Point(821, 26);
+            btnplay.Location = new Point(718, 20);
+            btnplay.Margin = new Padding(3, 2, 3, 2);
             btnplay.Name = "btnplay";
-            btnplay.Size = new Size(280, 70);
+            btnplay.Size = new Size(245, 52);
             btnplay.TabIndex = 0;
             btnplay.Text = "Play";
             btnplay.UseVisualStyleBackColor = false;
@@ -58,9 +59,10 @@
             btnhelp.Cursor = Cursors.IBeam;
             btnhelp.Font = new Font("Palatino Linotype", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnhelp.ForeColor = Color.MidnightBlue;
-            btnhelp.Location = new Point(821, 113);
+            btnhelp.Location = new Point(718, 85);
+            btnhelp.Margin = new Padding(3, 2, 3, 2);
             btnhelp.Name = "btnhelp";
-            btnhelp.Size = new Size(280, 70);
+            btnhelp.Size = new Size(245, 52);
             btnhelp.TabIndex = 1;
             btnhelp.Text = "Help";
             btnhelp.UseVisualStyleBackColor = false;
@@ -73,12 +75,14 @@
             btnhighscores.Cursor = Cursors.IBeam;
             btnhighscores.Font = new Font("Palatino Linotype", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnhighscores.ForeColor = Color.MidnightBlue;
-            btnhighscores.Location = new Point(821, 198);
+            btnhighscores.Location = new Point(718, 148);
+            btnhighscores.Margin = new Padding(3, 2, 3, 2);
             btnhighscores.Name = "btnhighscores";
-            btnhighscores.Size = new Size(280, 70);
+            btnhighscores.Size = new Size(245, 52);
             btnhighscores.TabIndex = 2;
             btnhighscores.Text = "High Scores";
             btnhighscores.UseVisualStyleBackColor = false;
+            btnhighscores.Click += btnhighscores_Click;
             // 
             // btnMoreGame
             // 
@@ -88,24 +92,26 @@
             btnMoreGame.Cursor = Cursors.IBeam;
             btnMoreGame.Font = new Font("Palatino Linotype", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnMoreGame.ForeColor = Color.MidnightBlue;
-            btnMoreGame.Location = new Point(821, 285);
+            btnMoreGame.Location = new Point(718, 214);
+            btnMoreGame.Margin = new Padding(3, 2, 3, 2);
             btnMoreGame.Name = "btnMoreGame";
-            btnMoreGame.Size = new Size(280, 70);
+            btnMoreGame.Size = new Size(245, 52);
             btnMoreGame.TabIndex = 3;
             btnMoreGame.Text = "More Games";
             btnMoreGame.UseVisualStyleBackColor = false;
             // 
             // FormMenu
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackgroundImage = Properties.Resources.BackgroundFormMenu;
             BackgroundImageLayout = ImageLayout.Zoom;
-            ClientSize = new Size(1391, 490);
+            ClientSize = new Size(1217, 368);
             Controls.Add(btnMoreGame);
             Controls.Add(btnhighscores);
             Controls.Add(btnhelp);
             Controls.Add(btnplay);
+            Margin = new Padding(3, 2, 3, 2);
             Name = "FormMenu";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Happy Jumping frog";
