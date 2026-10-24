@@ -23,11 +23,7 @@ namespace Sec2_Group1_HappyJumpingFrog
 
         private void btnplay_Click(object sender, EventArgs e)
         {
-            FormGame game = new FormGame();
-            game.FormClosed += (s, args) =>
-            {
-                this.Show();
-            };
+            FormGame game = new FormGame();    
             game.Show();
             this.Hide();
         }

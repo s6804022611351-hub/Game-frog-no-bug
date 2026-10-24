@@ -10,6 +10,15 @@
     <Compile Update="FormGame(Window)\FormHighScore.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="FormGameOver.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Score\FormScoreSubmitted.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Score\FormSubmitScore.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx">

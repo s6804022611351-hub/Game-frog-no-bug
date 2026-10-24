@@ -288,7 +288,7 @@ namespace Sec2_Group1_HappyJumpingFrog
                 {
                     lotus.IsCollected = true; // ซ่อนดอกบัวดอกนี้ทันที
                     _goal++;                  // เพิ่มจำนวนที่เก็บได้บนแถบขวา (Goal: x/5)
-                    _score += 100;            // บวกคะแนนเพิ่ม 100 คะแนน
+                    _score += 1;            // บวกคะแนนเพิ่ม 1คะแนน
 
                     // วาร์ปกบกลับไปเริ่มใหม่ที่จุดเริ่มต้นด้านล่าง
                     _frog.X = 350;
@@ -309,8 +309,19 @@ namespace Sec2_Group1_HappyJumpingFrog
             if (_frog.IsGameOver)
             {
                 timerGame.Stop();
-                MessageBox.Show("Game Over");
-                Close();
+
+
+                // สร้างหน้า Game Over พร้อมส่งคะแนน _score ไปแสดงผล
+                FormGameOver gameOverForm = new FormGameOver(_score);
+
+                // ซ่อนหน้าเกมไว้ก่อนเพื่อให้หน้าต่าง Game Over ค้างอยู่
+                this.Hide();
+
+                // เปิดหน้า Game Over แบบ Dialog
+                gameOverForm.ShowDialog(this);
+
+                // ปิดฟอร์มเกมถาวรเมื่อปิดหน้า Game Over แล้ว
+                this.Close();
             }
 
             Invalidate(); // สั่งรีเฟรชหน้าจอ
