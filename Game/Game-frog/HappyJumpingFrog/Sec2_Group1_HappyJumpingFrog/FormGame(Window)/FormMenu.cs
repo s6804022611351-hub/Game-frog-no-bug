@@ -31,5 +31,11 @@ namespace Sec2_Group1_HappyJumpingFrog
             game.Show();
             this.Hide();
         }
+
+        private void btnhighscores_Click(object sender, EventArgs e)
+        {
+            FormHighScore highScoreForm = new FormHighScore();
+            highScoreForm.ShowDialog(this);
+        }
     }
 }
