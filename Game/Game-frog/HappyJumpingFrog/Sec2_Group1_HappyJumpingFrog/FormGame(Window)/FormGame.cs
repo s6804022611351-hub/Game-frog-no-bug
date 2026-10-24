@@ -232,27 +232,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             timerGame.Enabled = !_paused;
         }
 
-        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
-        {
-            if (keyData == Keys.P)
-            {
-                TogglePause();
-                Invalidate();
-                return true;
-            }
-
-            if (keyData == Keys.Up || keyData == Keys.Down ||
-                keyData == Keys.Left || keyData == Keys.Right)
-            {
-                if (!_paused)
-                {
-                    _frog.Hop(keyData, _fieldWidth, WorldHeight);
-                    Invalidate();
-                }
-                return true;
-            }
-            return base.ProcessCmdKey(ref msg, keyData);
-        }
+        
 
         // ==========================================
         // ฟังก์ชัน Timer ทำงานตามรอบเวลา (อัปเดตสถานะเกม)
@@ -335,7 +315,81 @@ namespace Sec2_Group1_HappyJumpingFrog
 
             Invalidate(); // สั่งรีเฟรชหน้าจอ
         }
+        
+        
+        private void CollectLotusByIndex(int index)
+        {
+            if (index >= 0 && index < _lotuses.Count)
+            {
+                TargetLotus lotus = _lotuses[index];
 
+                if (!lotus.IsCollected)
+                {
+                    lotus.IsCollected = true;
+                    _goal++;
+                    _score += 100;
+
+                    // วาร์ปกบกลับจุดเริ่มต้นด้านล่าง
+                    _frog.X = 350;
+                    _frog.Y = 600;
+
+                    Invalidate();
+
+                    if (_goal >= 5)
+                    {
+                        timerGame.Stop();
+                        MessageBox.Show("You Win! คุณผ่านด่านเรียบร้อยแล้ว!", "Congratulations");
+                        Close();
+                    }
+                }
+            }
+        }
+
+        // 📍 วาง ProcessCmdKey ต่อท้ายลงมาได้เลย
+        // ==========================================
+        // ดักจับการกดคีย์บอร์ด (P, Z, X, C, V, B, ปุ่มลูกศร และ WASD)
+        // ==========================================
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            // 1. กด P เพื่อ Pause
+            if (keyData == Keys.P)
+            {
+                TogglePause();
+                Invalidate();
+                return true;
+            }
+
+            // 2. กด Z, X, C, V, B เพื่อวาร์ปเก็บดอกบัวดอกที่ 1-5
+            if (!_paused)
+            {
+                if (keyData == Keys.Z) { CollectLotusByIndex(0); return true; }
+                if (keyData == Keys.X) { CollectLotusByIndex(1); return true; }
+                if (keyData == Keys.C) { CollectLotusByIndex(2); return true; }
+                if (keyData == Keys.V) { CollectLotusByIndex(3); return true; }
+                if (keyData == Keys.B) { CollectLotusByIndex(4); return true; }
+            }
+
+            // 3. แปลงปุ่ม WASD ให้เป็นปุ่มลูกศรทิศทาง
+            Keys moveKey = keyData;
+            if (keyData == Keys.W) moveKey = Keys.Up;
+            else if (keyData == Keys.S) moveKey = Keys.Down;
+            else if (keyData == Keys.A) moveKey = Keys.Left;
+            else if (keyData == Keys.D) moveKey = Keys.Right;
+
+            // 4. สั่งกบกระโดด (รองรับทั้ง ปุ่มลูกศร และ WASD)
+            if (moveKey == Keys.Up || moveKey == Keys.Down ||
+                moveKey == Keys.Left || moveKey == Keys.Right)
+            {
+                if (!_paused)
+                {
+                    _frog.Hop(moveKey, _fieldWidth, WorldHeight);
+                    Invalidate();
+                }
+                return true;
+            }
+
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
         private void FormGame_Load(object sender, EventArgs e)
         {
         }
