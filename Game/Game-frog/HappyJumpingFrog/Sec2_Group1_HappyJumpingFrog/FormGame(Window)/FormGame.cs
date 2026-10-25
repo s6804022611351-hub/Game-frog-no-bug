@@ -14,12 +14,12 @@ namespace Sec2_Group1_HappyJumpingFrog
         // ==========================================
         // 1. ประกาศตัวแปรระดับคลาส
         // ==========================================
-        private List<TargetLotus> _lotuses = new List<TargetLotus>(); // ลิสต์เก็บดอกบัวทั้ง 5 ดอก
+        private List<TargetLotus> _lotuses = new List<TargetLotus>(); // ลิสต์เก็บดอกบัวของด่านย่อยปัจจุบัน
         private River river;                    // ตัวแปรสำหรับจัดการแม่น้ำและปลา
         private PlayerFrog _frog;              // ตัวละครกบของผู้เล่น
         private Road _road;                    // วัตถุจัดการถนนและศัตรูบนถนน
         private Image _background;             // รูปภาพพื้นหลังเกม
-        private Image _lotusImage;             // [แก้] เก็บรูปดอกบัวไว้ใช้ซ้ำ (ไม่ดึงจาก Resources ทุกเฟรม)
+        private Image _lotusImage;             // เก็บรูปดอกบัวไว้ใช้ซ้ำ
 
         // ค่าคงที่ขนาดหน้าจอและพื้นที่เล่นเกม
         private const int WorldHeight = 650;   // ความสูงพื้นที่เกม
@@ -36,21 +36,29 @@ namespace Sec2_Group1_HappyJumpingFrog
         private const float StartX = 350;
         private const float StartY = 565;
 
-        // [เวลา] เวลาของด่านหลักแต่ละด่าน (วินาที): ด่าน 1 = 1500, ด่าน 2 = 1200, ด่าน 3 = 900
+        // [ด่านย่อย] ขนาดและตำแหน่งแนวตั้งของดอกบัว
+        private const float LotusWidth = 110f;
+        private const float LotusHeight = 70f;
+        private const float LotusCenterY = 50f;   // ตรงกับกึ่งกลางแถวบนสุดที่กบกระโดดไปถึง
+        private const int SubLevelCount = 5;      // [ด่านย่อย] จำนวนด่านย่อยต่อด่านหลัก
+
+        // เวลาของด่านหลักแต่ละด่าน (วินาที): ด่าน 1 = 1500, ด่าน 2 = 1200, ด่าน 3 = 900
         private static readonly int[] LevelSeconds = { 1500, 1200, 900 };
 
         private float _scale = 1f;             // สเกลอัตราส่วนย่อ/ขยาย
         private int _fieldWidth = 750;         // ความกว้างพื้นที่สนามเล่น
 
-        // [เวลา] นาฬิกาจับเวลาถอยหลัง + ตัววัดเวลาจริงระหว่างเฟรม
+        // นาฬิกาจับเวลาถอยหลัง + ตัววัดเวลาจริงระหว่างเฟรม
         private GameTimer _gameTimer;
         private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
         private double _lastElapsed = 0;
 
         // สถานะเกมและคะแนน
-        private int _level = 1;                // ด่านปัจจุบัน (สูงสุด 3)
+        private int _level = 1;                // ด่านหลักปัจจุบัน (สูงสุด 3)
+        private int _subLevel = 1;             // [ด่านย่อย] ด่านย่อยปัจจุบัน (1-5)
         private int _score = 0;                // คะแนน
-        private int _goal = 0;                 // จำนวนดอกบัวที่เก็บได้ (เป้าหมาย 5)
+        private int _goal = 0;                 // จำนวนดอกบัวที่เก็บได้ในด่านย่อยนี้
+        private int _goalTarget = 5;           // [ด่านย่อย] จำนวนดอกบัวที่ต้องเก็บ (5,4,3,2,1)
         private bool _paused = false;          // สถานะหยุดเกม
         private bool _soundOn = true;          // สถานะเสียง SFX
         private bool _musicOn = true;          // สถานะเพลง BGM
@@ -88,28 +96,40 @@ namespace Sec2_Group1_HappyJumpingFrog
 
             river = new River(_fieldWidth);
 
-            // [เวลา] สร้างนาฬิกาของด่านปัจจุบัน
+            // สร้างนาฬิกาของด่านปัจจุบัน
             _gameTimer = new GameTimer(LevelSeconds[_level - 1]);
 
-            // สร้างดอกบัว 5 ดอก วางบนพื้นด้านบน
-            float lotusWidth = 110f;
-            float lotusHeight = 70f;
-            float padding = 25f;
-
-            float availableWidth = _fieldWidth - (padding * 2) - lotusWidth;
-            float step = availableWidth / 4f;
-
-            _lotuses.Clear();
-            for (int i = 0; i < 5; i++)
-            {
-                float x = padding + (i * step);
-                float y = 20;
-                _lotuses.Add(new TargetLotus(_lotusImage, x, y, lotusWidth, lotusHeight));
-            }
+            // [ด่านย่อย] สร้างดอกบัวของด่านย่อยแรก (5 ใบ)
+            BuildLotuses();
 
             timerGame.Interval = 16; // ประมาณ 60 FPS
-            _lastElapsed = _stopwatch.Elapsed.TotalSeconds;   // [เวลา] เริ่มนับจากตอนนี้
+            _lastElapsed = _stopwatch.Elapsed.TotalSeconds;
             timerGame.Start();
+        }
+
+        // [ด่านย่อย] สร้างดอกบัวใหม่ตามด่านย่อย: ด่านย่อย 1..5 -> 5,4,3,2,1 ใบ
+        private void BuildLotuses()
+        {
+            _lotuses.Clear();
+            _goal = 0;
+            _goalTarget = SubLevelCount + 1 - _subLevel;
+
+            for (int i = 0; i < _goalTarget; i++)
+                _lotuses.Add(new TargetLotus(_lotusImage, 0, 0, LotusWidth, LotusHeight));
+
+            PositionLotuses();
+        }
+
+        // [ด่านย่อย] จัดตำแหน่งดอกบัวให้อยู่กลางสนามเสมอ (แบ่งสนามเป็นช่องเท่าๆ กัน แล้ววางกลางช่อง)
+        private void PositionLotuses()
+        {
+            int n = _lotuses.Count;
+            for (int i = 0; i < n; i++)
+            {
+                TargetLotus lotus = _lotuses[i];
+                lotus.X = (i + 0.5f) * _fieldWidth / n - lotus.Width / 2f;
+                lotus.Y = LotusCenterY - lotus.Height / 2f;
+            }
         }
 
         private void UpdateLayout()
@@ -124,6 +144,8 @@ namespace Sec2_Group1_HappyJumpingFrog
             if (river != null) river.SetAreaWidth(_fieldWidth);
             if (_frog != null && _frog.X > _fieldWidth - _frog.Width)
                 _frog.X = _fieldWidth - _frog.Width;
+
+            PositionLotuses();   // [ด่านย่อย] จัดดอกบัวให้อยู่กลางสนามใหม่ทุกครั้งที่ขนาดเปลี่ยน
         }
 
         protected override void OnResize(EventArgs e)
@@ -146,7 +168,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             // 1. พื้นหลัง
             g.DrawImage(_background, 0, 0, _fieldWidth, WorldHeight);
 
-            // 2. ดอกบัว 5 ดอก (ยังไม่เก็บ = รูปดอกบัว, เก็บแล้ว = ให้ TargetLotus วาดสถานะเก็บแล้ว)
+            // 2. ดอกบัว (ยังไม่เก็บ = รูปดอกบัว, เก็บแล้ว = ให้ TargetLotus วาดสถานะเก็บแล้ว)
             foreach (var lotus in _lotuses)
             {
                 if (!lotus.IsCollected)
@@ -185,14 +207,15 @@ namespace Sec2_Group1_HappyJumpingFrog
                 g.DrawRectangle(border, _fieldWidth + 3, 3, PanelWidth - 6, WorldHeight - 6);
             }
 
-            // [เวลา] จัดตำแหน่งให้มีช่อง Time เพิ่มอีก 1 ช่อง
             float cx = _fieldWidth + PanelWidth / 2f;
             DrawCenteredText(g, "Level:", _titleFont, cx, 15);
             DrawCenteredText(g, _level + "/3", _valueFont, cx, 48);
+            // [ด่านย่อย] แสดงด่านย่อยปัจจุบัน
+            DrawCenteredText(g, "Stage " + _subLevel + "/" + SubLevelCount, _smallFont, cx, 72);
             DrawCenteredText(g, "Score:", _titleFont, cx, 90);
             DrawCenteredText(g, _score.ToString(), _valueFont, cx, 123);
             DrawCenteredText(g, "Goal:", _titleFont, cx, 165);
-            DrawCenteredText(g, _goal + "/5", _valueFont, cx, 198);
+            DrawCenteredText(g, _goal + "/" + _goalTarget, _valueFont, cx, 198);   // [ด่านย่อย]
             DrawCenteredText(g, "Lives:", _titleFont, cx, 240);
             DrawCenteredText(g, _frog.Lives.ToString(), _valueFont, cx, 273);
             DrawCenteredText(g, "Time:", _titleFont, cx, 315);
@@ -203,7 +226,6 @@ namespace Sec2_Group1_HappyJumpingFrog
             DrawButton(g, ButtonRect(2), "BGM", _musicOn);
         }
 
-        // [เวลา] ปุ่มเริ่มที่ y = 410 และห่างกัน 75
         private RectangleF ButtonRect(int index)
         {
             float x = _fieldWidth + (PanelWidth - ButtonSize) / 2f;
@@ -256,7 +278,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             _paused = !_paused;
             timerGame.Enabled = !_paused;
 
-            // [เวลา] ตอนเล่นต่อ เริ่มนับใหม่ เพื่อไม่ให้นับเวลาที่หยุดเกมอยู่
+            // ตอนเล่นต่อ เริ่มนับใหม่ เพื่อไม่ให้นับเวลาที่หยุดเกมอยู่
             if (!_paused)
                 _lastElapsed = _stopwatch.Elapsed.TotalSeconds;
         }
@@ -310,7 +332,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             if (_frog.X < -_frog.Width / 2f || _frog.X > _fieldWidth - _frog.Width / 2f)
                 _frog.Die();
 
-            // 3. [แก้] ตรวจจับกบกระโดดไปลงดอกบัว (ย้ายมาจาก OnPaint)
+            // 3. ตรวจจับกบกระโดดไปลงดอกบัว
             foreach (var lotus in _lotuses)
             {
                 if (!_frog.Intersects(lotus)) continue;
@@ -325,10 +347,11 @@ namespace Sec2_Group1_HappyJumpingFrog
                     _frog.X = StartX;
                     _frog.Y = StartY;
 
-                    if (_goal >= 5)
+                    // [ด่านย่อย] เก็บครบตามจำนวนของด่านย่อยนี้แล้ว
+                    if (_goal >= _goalTarget)
                     {
-                        HandleLevelClear();
-                        return;
+                        HandleSubLevelClear();
+                        return;   // ต้อง return เพราะลิสต์ดอกบัวถูกสร้างใหม่แล้ว
                     }
                 }
                 else
@@ -339,7 +362,7 @@ namespace Sec2_Group1_HappyJumpingFrog
                 break;
             }
 
-            // 4. [เวลา] นับเวลาถอยหลังตามเวลาจริงที่ผ่านไป
+            // 4. นับเวลาถอยหลังตามเวลาจริงที่ผ่านไป
             double now = _stopwatch.Elapsed.TotalSeconds;
             _gameTimer.Tick(now - _lastElapsed);
             _lastElapsed = now;
@@ -378,17 +401,38 @@ namespace Sec2_Group1_HappyJumpingFrog
 
                     Invalidate();
 
-                    if (_goal >= 5)
+                    if (_goal >= _goalTarget)
                     {
-                        HandleLevelClear();
+                        HandleSubLevelClear();
                     }
                 }
             }
         }
 
         // ==========================================
-        // 6. ระบบจัดการด่าน (สิ้นสุดที่ด่าน 3)
+        // 6. ระบบจัดการด่านย่อยและด่านหลัก
         // ==========================================
+
+        // [ด่านย่อย] เก็บดอกบัวครบในด่านย่อยนี้แล้ว
+        private void HandleSubLevelClear()
+        {
+            if (_subLevel < SubLevelCount)
+            {
+                // ขึ้นด่านย่อยถัดไปทันที ดอกบัวลดลงทีละ 1 ใบ (เวลายังเดินต่อ ไม่รีเซ็ต)
+                _subLevel++;
+                BuildLotuses();
+
+                _frog.X = StartX;
+                _frog.Y = StartY;
+
+                Invalidate();
+                return;
+            }
+
+            // ผ่านครบ 5 ด่านย่อย -> ผ่านด่านหลัก
+            HandleLevelClear();
+        }
+
         private void HandleLevelClear()
         {
             timerGame.Stop();
@@ -425,18 +469,15 @@ namespace Sec2_Group1_HappyJumpingFrog
         private void StartNextLevel()
         {
             _level++;
-            _goal = 0;
+            _subLevel = 1;      // [ด่านย่อย] เริ่มด่านย่อยแรกของด่านหลักใหม่
             _paused = false;
 
-            foreach (var lotus in _lotuses)
-            {
-                lotus.IsCollected = false;
-            }
+            BuildLotuses();     // [ด่านย่อย] กลับมาเริ่มที่ 5 ใบ
 
             _frog.X = StartX;
             _frog.Y = StartY;
 
-            // [เวลา] ขึ้นด่านใหม่ ตั้งเวลาตามด่านนั้น (ด่าน 2 = 1200, ด่าน 3 = 900)
+            // ขึ้นด่านหลักใหม่ ตั้งเวลาตามด่านนั้น (ด่าน 2 = 1200, ด่าน 3 = 900)
             _gameTimer.Reset(LevelSeconds[_level - 1]);
             _lastElapsed = _stopwatch.Elapsed.TotalSeconds;
 
