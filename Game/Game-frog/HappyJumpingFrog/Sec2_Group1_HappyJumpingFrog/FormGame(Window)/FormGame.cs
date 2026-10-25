@@ -50,7 +50,7 @@ namespace Sec2_Group1_HappyJumpingFrog
         private static readonly int[] LevelSeconds = { 1500, 1200, 900 };
 
         private float _scale = 1f;             // สเกลอัตราส่วนย่อ/ขยาย
-        private int _fieldWidth = 750;         // ความกว้างพื้นที่สนามเล่น
+        private const int _fieldWidth = 750;        // 📍 กำหนดความกว้างสนามเล่นให้คงที่ 750 พิกเซลเสมอ (ไม่เปลี่ยนตามขนาดจอ)
 
         // นาฬิกาจับเวลาถอยหลัง + ตัววัดเวลาจริงระหว่างเฟรม
         private GameTimer _gameTimer;
@@ -142,32 +142,23 @@ namespace Sec2_Group1_HappyJumpingFrog
 
         private void UpdateLayout()
         {
-            if (ClientSize.Height <= 0) return;
+            if (ClientSize.Height <= 0 || ClientSize.Width <= 0) return;
 
-            _scale = ClientSize.Height / (float)WorldHeight;
-            float worldWidth = ClientSize.Width / _scale;
-            _fieldWidth = Math.Max(300, (int)(worldWidth - PanelWidth));
-
-            if (_road != null) _road.SetAreaWidth(_fieldWidth);
-            if (river != null) river.SetAreaWidth(_fieldWidth);
-            if (_frog != null && _frog.X > _fieldWidth - _frog.Width)
-                _frog.X = _fieldWidth - _frog.Width;
-
+            // จัดตำแหน่งดอกบัวอิงตาม FieldWidth คงที่ (750)
             PositionLotuses();
         }
+
+
         private void UpdateLevelBackground()
         {
-            if (_level == 2)
+            if (_level == 2 || _level == 3)
             {
-                _background = Properties.Resources.background2; // รูปสำหรับด่าน 2
-            }
-            else if (_level == 3)
-            {
-                _background = Properties.Resources.background2; // ด่าน 3 (ใช้รูปด่าน 2 หรือเปลี่ยนเป็นรูปอื่นตามต้องการ)
+                // เช็กชื่อ Resource ให้ตรงกับใน Properties (เช่น background2 หรือ S__4071439)
+                _background = Properties.Resources.background2;
             }
             else
             {
-                _background = Properties.Resources.background;  // ด่าน 1 ใช้รูปเดิม
+                _background = Properties.Resources.background;
             }
         }
         protected override void OnResize(EventArgs e)
@@ -185,33 +176,27 @@ namespace Sec2_Group1_HappyJumpingFrog
             base.OnPaint(e);
             Graphics g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
-            g.ScaleTransform(_scale, _scale);
 
-            // 1. พื้นหลัง
+            float scaleX = ClientSize.Width / (float)(_fieldWidth + PanelWidth);
+            float scaleY = ClientSize.Height / (float)WorldHeight;
+            g.ScaleTransform(scaleX, scaleY);
+
             g.DrawImage(_background, 0, 0, _fieldWidth, WorldHeight);
 
-            // 2. ดอกบัว (วาดเฉพาะดอกที่ยังไม่ถูกเก็บ)
             foreach (var lotus in _lotuses)
             {
                 if (!lotus.IsCollected)
                     g.DrawImage(_lotusImage, lotus.X, lotus.Y, lotus.Width, lotus.Height);
             }
 
-            // 3. แม่น้ำและปลา
             if (river != null) river.Draw(g);
-
-            // 4. ถนนและศัตรู
             _road.Draw(g);
-
-            // 5. ไอเท็มหัวใจ (ถ้า IsActive เป็น true)
             _heartItem?.Draw(g);
-
-            // 6. ตัวละครกบ
             _frog.Draw(g);
-
-            // 7. แผงเมนูด้านขวา
             DrawSidePanel(g);
-       
+
+            if (_paused)
+                DrawCenteredText(g, "PAUSED", _titleFont, _fieldWidth / 2f, WorldHeight / 2f - 15);
         }
 
         private void DrawSidePanel(Graphics g)
@@ -625,10 +610,12 @@ namespace Sec2_Group1_HappyJumpingFrog
             _level++;
             _subLevel = 1;
             _paused = false;
+
+            // สลับภาพพื้นหลังตามด่านใหม่
             UpdateLevelBackground();
+
             BuildLotuses();
 
-            // สุ่มตำแหน่งหัวใจใหม่สำหรับด่านถัดไป
             if (_heartItem != null)
             {
                 _heartItem.SpawnRandom(_fieldWidth, WorldHeight);
@@ -637,23 +624,13 @@ namespace Sec2_Group1_HappyJumpingFrog
             _frog.X = StartX;
             _frog.Y = StartY;
 
-            // ขึ้นด่านหลักใหม่ ตั้งเวลาตามด่านนั้น (ด่าน 2 = 1200, ด่าน 3 = 900)
             _gameTimer.Reset(LevelSeconds[_level - 1]);
             _lastElapsed = _stopwatch.Elapsed.TotalSeconds;
 
-            if (timerGame.Interval > 6)
-            {
-                timerGame.Interval -= 3;
-            }
-
             this.Text = $"Happy Jumping Frog - Level {_level}";
 
-            this.Activate();
-            this.Focus();
-            this.ActiveControl = null;
-
             timerGame.Start();
-            Invalidate();
+            Invalidate(); // สั่งวาดหน้าจอใหม่ทันที
         }
 
         // 7. ปุ่มควบคุม (WASD, ปุ่มลูกศร, P, Z-B, N)
@@ -684,6 +661,11 @@ namespace Sec2_Group1_HappyJumpingFrog
                 if (keyData == Keys.C) { CollectLotusByIndex(2); return true; }
                 if (keyData == Keys.V) { CollectLotusByIndex(3); return true; }
                 if (keyData == Keys.B) { CollectLotusByIndex(4); return true; }
+                if (keyData == Keys.L)
+                {
+                    StartNextLevel(); // กด L เพื่อข้ามไปด่านถัดไปทันที
+                    return true;
+                }
             }
 
             // ปุ่มควบคุมการเดิน (WASD และ Arrow Keys)
