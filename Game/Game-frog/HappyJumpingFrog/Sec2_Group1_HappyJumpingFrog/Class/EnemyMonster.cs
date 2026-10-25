@@ -9,11 +9,20 @@ namespace Sec2_Group1_HappyJumpingFrog.Class
 {
     public class EnemyMonster : GameObject  
     {
+        public const int EnemyHeight = 56;   // ความสูงศัตรู (ปรับได้)
+
+        // คำนวณความกว้างจากสัดส่วนรูปจริง ภาพจะไม่บีบ
+        private static int CalcWidth(Image sprite)
+        {
+            return (int)(EnemyHeight * (double)sprite.Width / sprite.Height + 0.5);
+        }
+
+
         private readonly float _speed;        // บวก = ไปขวา, ลบ = ไปซ้าย
         public int AreaWidth { get; set; }  
 
         public EnemyMonster(Image sprite, float x, float y, float speed, int areaWidth)
-            : base(sprite, x, y, 50, 50)
+            : base(sprite, x, y, CalcWidth(sprite), EnemyHeight)
         {
             _speed = speed;
             AreaWidth = areaWidth;

@@ -7,26 +7,36 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Sec2_Group1_HappyJumpingFrog
 {
     public partial class FormScoreSubmitted : Form
     {
-        public FormScoreSubmitted()
+        private string _playerName = "";
+        private int _score = 0;
+
+        public FormScoreSubmitted(string playerName, int score)
         {
             InitializeComponent();
+            _playerName = playerName;
+            _score = score;
         }
 
         private void btnviewsco_Click(object sender, EventArgs e)
         {
-            // ซ่อนหน้ากรอกชื่อชั่วคราว
             this.Hide();
 
-            // เปิดหน้าต่าง Score Submitted
-            FormHighScore leaderboardForm = new FormHighScore();
-            leaderboardForm.ShowDialog(this);
+            // เปิดหน้า High Score
+            FormHighScore highScoreForm = new FormHighScore(_playerName, _score);
+            highScoreForm.ShowDialog(this);
 
-            
+            this.Close();
+        }
+
+        private void btnclose_Click(object sender, EventArgs e)
+        {
+            Close();
         }
     }
 }
