@@ -65,7 +65,7 @@
             btnend.UseVisualStyleBackColor = true;
             btnend.Click += btnend_Click;
             // 
-            // LevelFailed
+            // FormLevelFailed
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -74,7 +74,8 @@
             Controls.Add(btntryagin);
             Controls.Add(label1);
             FormBorderStyle = FormBorderStyle.None;
-            Name = "LevelFailed";
+            Name = "FormLevelFailed";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "LevelFailed";
             ResumeLayout(false);
             PerformLayout();

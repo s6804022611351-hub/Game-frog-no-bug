@@ -40,10 +40,12 @@ namespace Sec2_Group1_HappyJumpingFrog
             // 
             // FormGame
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1251, 686);
+            ClientSize = new Size(1095, 514);
+            Margin = new Padding(3, 2, 3, 2);
             Name = "FormGame";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "FormGame";
             Load += FormGame_Load;
             ResumeLayout(false);
