@@ -42,7 +42,7 @@
             btnContinue.TabIndex = 0;
             btnContinue.Text = "Continue";
             btnContinue.UseVisualStyleBackColor = true;
-            btnContinue.Click += this.btnContinue_Click;
+            btnContinue.Click += btnContinue_Click;
             // 
             // btnMenu
             // 
@@ -52,6 +52,7 @@
             btnMenu.TabIndex = 1;
             btnMenu.Text = "Menu";
             btnMenu.UseVisualStyleBackColor = true;
+            btnMenu.Click += btnMenu_Click;
             // 
             // btnSound
             // 
@@ -61,6 +62,7 @@
             btnSound.TabIndex = 2;
             btnSound.Text = "Sound On";
             btnSound.UseVisualStyleBackColor = true;
+            btnSound.Click += btnSound_Click;
             // 
             // btnMusic
             // 
@@ -70,8 +72,9 @@
             btnMusic.TabIndex = 3;
             btnMusic.Text = "button4";
             btnMusic.UseVisualStyleBackColor = true;
+            btnMusic.Click += btnMusic_Click;
             // 
-            // UserContralPause
+            // UserControlPause
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -79,7 +82,7 @@
             Controls.Add(btnSound);
             Controls.Add(btnMenu);
             Controls.Add(btnContinue);
-            Name = "UserContralPause";
+            Name = "UserControlPause";
             Size = new Size(337, 379);
             ResumeLayout(false);
         }
