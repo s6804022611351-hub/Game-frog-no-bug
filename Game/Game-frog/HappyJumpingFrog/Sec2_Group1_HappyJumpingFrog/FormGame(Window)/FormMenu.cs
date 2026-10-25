@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sec2_Group1_HappyJumpingFrog.FormGame_Window_;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -18,12 +19,12 @@ namespace Sec2_Group1_HappyJumpingFrog
 
         private void FormMenu_Load(object sender, EventArgs e)
         {
-           
+
         }
 
         private void btnplay_Click(object sender, EventArgs e)
         {
-            FormGame game = new FormGame();    
+            FormGame game = new FormGame();
             game.Show();
             this.Hide();
         }
@@ -32,6 +33,17 @@ namespace Sec2_Group1_HappyJumpingFrog
         {
             FormHighScore highScoreForm = new FormHighScore();
             highScoreForm.ShowDialog(this);
+        }
+
+        private void btnhelp_Click(object sender, EventArgs e)
+        {
+            FormHelpScreen help = new FormHelpScreen();
+            help.ShowDialog();
+        }
+
+        private void btnMoreGame_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("More Games");
         }
     }
 }

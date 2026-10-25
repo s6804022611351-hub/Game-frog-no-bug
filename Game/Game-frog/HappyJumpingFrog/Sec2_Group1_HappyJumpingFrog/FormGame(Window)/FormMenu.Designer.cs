@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMenu));
             btnplay = new Button();
             btnhelp = new Button();
             btnhighscores = new Button();
@@ -36,14 +37,19 @@
             // 
             // btnplay
             // 
-            btnplay.BackColor = Color.FromArgb(192, 255, 255);
-            btnplay.BackgroundImageLayout = ImageLayout.None;
-            btnplay.Cursor = Cursors.IBeam;
-            btnplay.Font = new Font("Palatino Linotype", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnplay.ForeColor = Color.MidnightBlue;
+            btnplay.BackColor = Color.Transparent;
+            btnplay.BackgroundImage = (Image)resources.GetObject("btnplay.BackgroundImage");
+            btnplay.BackgroundImageLayout = ImageLayout.Zoom;
+            btnplay.Cursor = Cursors.Hand;
+            btnplay.FlatAppearance.BorderSize = 0;
+            btnplay.FlatAppearance.MouseDownBackColor = Color.Transparent;
+            btnplay.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            btnplay.FlatStyle = FlatStyle.Flat;
+            btnplay.Font = new Font("Javanese Text", 19.8000011F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnplay.ForeColor = Color.Teal;
             btnplay.Location = new Point(1300, 100);
             btnplay.Name = "btnplay";
-            btnplay.Size = new Size(420, 100);
+            btnplay.Size = new Size(485, 200);
             btnplay.TabIndex = 0;
             btnplay.Text = "Play";
             btnplay.UseVisualStyleBackColor = false;
@@ -51,28 +57,39 @@
             // 
             // btnhelp
             // 
-            btnhelp.BackColor = Color.FromArgb(192, 255, 255);
-            btnhelp.BackgroundImageLayout = ImageLayout.None;
-            btnhelp.Cursor = Cursors.IBeam;
-            btnhelp.Font = new Font("Palatino Linotype", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnhelp.ForeColor = Color.MidnightBlue;
-            btnhelp.Location = new Point(1300, 250);
+            btnhelp.BackColor = Color.Transparent;
+            btnhelp.BackgroundImage = (Image)resources.GetObject("btnhelp.BackgroundImage");
+            btnhelp.BackgroundImageLayout = ImageLayout.Zoom;
+            btnhelp.Cursor = Cursors.Hand;
+            btnhelp.FlatAppearance.BorderSize = 0;
+            btnhelp.FlatAppearance.MouseDownBackColor = Color.Transparent;
+            btnhelp.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            btnhelp.FlatStyle = FlatStyle.Flat;
+            btnhelp.Font = new Font("Javanese Text", 22.2F, FontStyle.Bold);
+            btnhelp.ForeColor = Color.Teal;
+            btnhelp.Location = new Point(1300, 260);
             btnhelp.Name = "btnhelp";
-            btnhelp.Size = new Size(420, 100);
+            btnhelp.Size = new Size(485, 200);
             btnhelp.TabIndex = 1;
             btnhelp.Text = "Help";
             btnhelp.UseVisualStyleBackColor = false;
+            btnhelp.Click += btnhelp_Click;
             // 
             // btnhighscores
             // 
-            btnhighscores.BackColor = Color.FromArgb(192, 255, 255);
-            btnhighscores.BackgroundImageLayout = ImageLayout.None;
-            btnhighscores.Cursor = Cursors.IBeam;
-            btnhighscores.Font = new Font("Palatino Linotype", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnhighscores.ForeColor = Color.MidnightBlue;
-            btnhighscores.Location = new Point(1300, 400);
+            btnhighscores.BackColor = Color.Transparent;
+            btnhighscores.BackgroundImage = (Image)resources.GetObject("btnhighscores.BackgroundImage");
+            btnhighscores.BackgroundImageLayout = ImageLayout.Zoom;
+            btnhighscores.Cursor = Cursors.Hand;
+            btnhighscores.FlatAppearance.BorderSize = 0;
+            btnhighscores.FlatAppearance.MouseDownBackColor = Color.Transparent;
+            btnhighscores.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            btnhighscores.FlatStyle = FlatStyle.Flat;
+            btnhighscores.Font = new Font("Javanese Text", 22.2F, FontStyle.Bold);
+            btnhighscores.ForeColor = Color.Teal;
+            btnhighscores.Location = new Point(1300, 420);
             btnhighscores.Name = "btnhighscores";
-            btnhighscores.Size = new Size(420, 100);
+            btnhighscores.Size = new Size(485, 200);
             btnhighscores.TabIndex = 2;
             btnhighscores.Text = "High Scores";
             btnhighscores.UseVisualStyleBackColor = false;
@@ -80,17 +97,23 @@
             // 
             // btnMoreGame
             // 
-            btnMoreGame.BackColor = Color.FromArgb(192, 255, 255);
-            btnMoreGame.BackgroundImageLayout = ImageLayout.None;
-            btnMoreGame.Cursor = Cursors.IBeam;
-            btnMoreGame.Font = new Font("Palatino Linotype", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnMoreGame.ForeColor = Color.MidnightBlue;
-            btnMoreGame.Location = new Point(1300, 550);
+            btnMoreGame.BackColor = Color.Transparent;
+            btnMoreGame.BackgroundImage = (Image)resources.GetObject("btnMoreGame.BackgroundImage");
+            btnMoreGame.BackgroundImageLayout = ImageLayout.Zoom;
+            btnMoreGame.Cursor = Cursors.Hand;
+            btnMoreGame.FlatAppearance.BorderSize = 0;
+            btnMoreGame.FlatAppearance.MouseDownBackColor = Color.Transparent;
+            btnMoreGame.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            btnMoreGame.FlatStyle = FlatStyle.Flat;
+            btnMoreGame.Font = new Font("Javanese Text", 22.2F, FontStyle.Bold);
+            btnMoreGame.ForeColor = Color.Teal;
+            btnMoreGame.Location = new Point(1300, 578);
             btnMoreGame.Name = "btnMoreGame";
-            btnMoreGame.Size = new Size(420, 100);
+            btnMoreGame.Size = new Size(485, 200);
             btnMoreGame.TabIndex = 3;
-            btnMoreGame.Text = "More Games";
+            btnMoreGame.Text = "More Games\r\n";
             btnMoreGame.UseVisualStyleBackColor = false;
+            btnMoreGame.Click += btnMoreGame_Click;
             // 
             // FormMenu
             // 
