@@ -39,14 +39,21 @@ namespace Sec2_Group1_HappyJumpingFrog
 
         private void btnsubmit_Click(object sender, EventArgs e)
         {
-            // ซ่อนหน้ากรอกชื่อทันที
+            string playerName = textentername.Text.Trim();
+
+            if (string.IsNullOrEmpty(playerName))
+            {
+                playerName = "Player"; // หรือชื่อสำรอง
+            }
+
+            // 2. ซ่อนหน้ากรอกชื่อนี้ไว้ก่อน
             this.Hide();
 
-            // เปิดหน้าใหม่แบบ Popup
-            FormScoreSubmitted submittedForm = new FormScoreSubmitted();
+            // 2. เปิดหน้า Score Submitted (ส่งชื่อและคะแนนไปด้วย)
+            FormScoreSubmitted submittedForm = new FormScoreSubmitted(playerName, finalScore);
             submittedForm.ShowDialog(this);
 
-            // ปิดฟอร์มนี้ถาวรหลังจากหน้าใหม่ปิดลง
+            // 4. ปิดหน้ากรอกชื่อนี้ถาวร
             this.Close();
         }
     }

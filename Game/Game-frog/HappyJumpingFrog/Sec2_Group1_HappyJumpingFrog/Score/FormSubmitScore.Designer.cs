@@ -60,13 +60,13 @@
             // textentername
             // 
             textentername.BackColor = SystemColors.Window;
-            textentername.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            textentername.Font = new Font("Segoe UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
             textentername.ForeColor = Color.Black;
             textentername.Location = new Point(36, 160);
             textentername.Multiline = true;
             textentername.Name = "textentername";
             textentername.PlaceholderText = "Enter your name";
-            textentername.Size = new Size(294, 28);
+            textentername.Size = new Size(347, 38);
             textentername.TabIndex = 2;
             // 
             // btnsubmit
@@ -77,9 +77,9 @@
             btnsubmit.FlatAppearance.BorderSize = 0;
             btnsubmit.FlatStyle = FlatStyle.System;
             btnsubmit.ForeColor = SystemColors.ControlLightLight;
-            btnsubmit.Location = new Point(36, 204);
+            btnsubmit.Location = new Point(36, 213);
             btnsubmit.Name = "btnsubmit";
-            btnsubmit.Size = new Size(84, 32);
+            btnsubmit.Size = new Size(84, 35);
             btnsubmit.TabIndex = 3;
             btnsubmit.Text = "Submit";
             btnsubmit.UseVisualStyleBackColor = false;
@@ -98,10 +98,10 @@
             // label4
             // 
             label4.AutoSize = true;
-            label4.Font = new Font("Segoe UI", 20.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label4.Font = new Font("Segoe UI", 21.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label4.Location = new Point(35, 19);
             label4.Name = "label4";
-            label4.Size = new Size(250, 37);
+            label4.Size = new Size(268, 40);
             label4.TabIndex = 5;
             label4.Text = "Submit your score";
             // 
@@ -126,7 +126,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(506, 291);
+            ClientSize = new Size(501, 291);
             Controls.Add(btnclose);
             Controls.Add(label4);
             Controls.Add(Score);

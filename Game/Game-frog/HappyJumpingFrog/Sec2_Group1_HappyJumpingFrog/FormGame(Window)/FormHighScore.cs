@@ -12,29 +12,57 @@ namespace Sec2_Group1_HappyJumpingFrog
     {
         private DataGridView dgvScores;
         private Button btnClose;
-        private List<Button> tabButtons = new List<Button>(); // ประกาศเก็บรายชื่อปุ่มแท็บเพื่อใช้ควบคุมการเปลี่ยนสี
+        private List<Button> tabButtons = new List<Button>();
 
+        // ตัวแปรเก็บชื่อผู้เล่นปัจจุบันที่เพิ่งส่งเข้ามา เพื่อใช้กรองในแท็บ MY SCORES
+        private string currentUserName = "";
+
+        // 1. Constructor แบบเดิม (เปิดดูตารางเฉยๆ)
         public FormHighScore()
         {
             SetupUI();
         }
 
+        // 2. Constructor แบบรับค่าชื่อและคะแนนเข้ามาบันทึกอัตโนมัติ
+        public FormHighScore(string playerName, int score)
+        {
+            currentUserName = playerName; // เก็บชื่อผู้เล่นไว้ใช้เช็กในแท็บ MY SCORES
+            SaveScoreToFile(playerName, score); // บันทึกข้อมูลลงไฟล์ scores.txt ทันที
+            SetupUI();
+        }
+
+        // 3. ฟังก์ชันสำหรับบันทึกข้อมูลลงไฟล์ .txt
+        private void SaveScoreToFile(string playerName, int score)
+        {
+            if (string.IsNullOrWhiteSpace(playerName)) return;
+
+            string filePath = "scores.txt";
+            string currentDate = DateTime.Now.ToString("yyyy-MM-dd");
+            string newScoreLine = $"{playerName},{score},{currentDate}";
+
+            try
+            {
+                File.AppendAllText(filePath, newScoreLine + Environment.NewLine);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error saving score: " + ex.Message);
+            }
+        }
+
         private void SetupUI()
         {
-            // ตั้งค่าหน้าต่าง Form ให้อยู่กึ่งกลางจอพอดี
             this.Text = "High Scores";
             this.ClientSize = new Size(600, 450);
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.FormBorderStyle = FormBorderStyle.None; // ซ่อนขอบหน้าต่างปกติเพื่อให้เหมือนเว็บ
+            this.FormBorderStyle = FormBorderStyle.None;
             this.BackColor = Color.White;
 
-            // วาดขอบหน้าต่างสีเทาอ่อนๆ ให้ดูมีมิติ
             this.Paint += (sender, e) =>
             {
                 e.Graphics.DrawRectangle(Pens.LightGray, 0, 0, this.ClientSize.Width - 1, this.ClientSize.Height - 1);
             };
 
-            // ปุ่มปิด (กากบาท X มุมขวาบน)
             btnClose = new Button();
             btnClose.Text = "✕";
             btnClose.Font = new Font("Arial", 12, FontStyle.Bold);
@@ -46,7 +74,6 @@ namespace Sec2_Group1_HappyJumpingFrog
             btnClose.Click += (sender, e) => { this.Close(); };
             this.Controls.Add(btnClose);
 
-            // สร้างปุ่มแท็บเมนูด้านบน
             string[] tabs = { "TODAY", "LAST WEEK", "LAST MONTH", "ALL TIME", "MY SCORES" };
             int startX = 20;
             int startY = 20;
@@ -56,8 +83,6 @@ namespace Sec2_Group1_HappyJumpingFrog
                 Button btn = new Button();
                 btn.Text = tabs[i];
                 btn.Font = new Font("Arial", 10, FontStyle.Bold);
-
-                // กำหนดให้ TODAY เป็นสีดำตั้งต้น (เลือกอยู่) ปุ่มอื่นเป็นสีเทา
                 btn.ForeColor = (tabs[i] == "TODAY") ? Color.Black : Color.Gray;
                 btn.FlatStyle = FlatStyle.Flat;
                 btn.FlatAppearance.BorderSize = 0;
@@ -67,49 +92,37 @@ namespace Sec2_Group1_HappyJumpingFrog
 
                 string tabName = tabs[i];
 
-                // เหตุการณ์เมื่อคลิกเลือกแท็บ
                 btn.Click += (sender, e) => {
-                    // เปลี่ยนสีปุ่มทั้งหมดกลับเป็นสีเทา
                     foreach (Button b in tabButtons)
                     {
                         b.ForeColor = Color.Gray;
                     }
-                    // เปลี่ยนเฉพาะปุ่มที่ถูกคลิกให้เป็นสีดำเข้ม
                     btn.ForeColor = Color.Black;
-
-                    // โหลดข้อมูลตามแท็บ
                     LoadScoreData(tabName);
                 };
 
                 this.Controls.Add(btn);
-                tabButtons.Add(btn); // เก็บลงในลิสต์ควบคุม
+                tabButtons.Add(btn);
                 startX += btn.Width + 15;
             }
 
-            // เส้นคั่นใต้เมนูแท็บ
             Panel line = new Panel();
             line.Size = new Size(560, 1);
             line.Location = new Point(20, 60);
             line.BackColor = Color.LightGray;
             this.Controls.Add(line);
 
-            // สร้างตาราง DataGridView
             dgvScores = new DataGridView();
             dgvScores.Location = new Point(20, 80);
             dgvScores.Size = new Size(560, 340);
-
-            // [จุดสำคัญ] เปลี่ยนมาใช้โหมด Fill เพื่อเกลี่ยขนาดให้พอดีตารางเป๊ะๆ ไม่มีเลื่อนแนวนอน
             dgvScores.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-
             dgvScores.BackgroundColor = Color.White;
             dgvScores.BorderStyle = BorderStyle.None;
             dgvScores.RowHeadersVisible = false;
             dgvScores.ReadOnly = true;
             dgvScores.ScrollBars = ScrollBars.Vertical;
-
             this.Controls.Add(dgvScores);
 
-            // สั่งเปิดมาให้เลือกแท็บ TODAY เป็นค่าเริ่มต้นทันที
             LoadScoreData("TODAY");
         }
 
@@ -122,7 +135,6 @@ namespace Sec2_Group1_HappyJumpingFrog
             dt.Columns.Add("Date", typeof(string));
 
             string filePath = "scores.txt";
-
             string todayStr = DateTime.Now.ToString("yyyy-MM-dd");
             DateTime today = DateTime.Today;
 
@@ -144,29 +156,32 @@ namespace Sec2_Group1_HappyJumpingFrog
 
                         if (filter == "ALL TIME")
                         {
-                            passFilter = true; // แสดงทั้งหมด
+                            passFilter = true;
                         }
                         else if (filter == "TODAY")
                         {
-                            if (dateStr == todayStr) passFilter = true; // แสดงเฉพาะวันนี้
+                            if (dateStr == todayStr) passFilter = true;
                         }
                         else if (filter == "LAST WEEK")
                         {
                             if (DateTime.TryParse(dateStr, out DateTime scoreDate))
                             {
-                                if ((today - scoreDate).TotalDays <= 7) passFilter = true; // ย้อนหลัง 7 วัน
+                                if ((today - scoreDate).TotalDays <= 7) passFilter = true;
                             }
                         }
                         else if (filter == "LAST MONTH")
                         {
                             if (DateTime.TryParse(dateStr, out DateTime scoreDate))
                             {
-                                if ((today - scoreDate).TotalDays <= 30) passFilter = true; // ย้อนหลัง 30 วัน
+                                if ((today - scoreDate).TotalDays <= 30) passFilter = true;
                             }
                         }
                         else if (filter == "MY SCORES")
                         {
-                            if (playerName == "FF") passFilter = true; // กรองเฉพาะชื่อผู้เล่น
+                            // กรองตามชื่อผู้เล่นที่กรอกเข้ามา (ถ้าไม่มีการส่งชื่อมา จะใช้ค่า "FF" เป็นค่าเริ่มต้น)
+                            string targetUser = string.IsNullOrEmpty(currentUserName) ? "FF" : currentUserName;
+                            if (playerName.Equals(targetUser, StringComparison.OrdinalIgnoreCase))
+                                passFilter = true;
                         }
 
                         if (passFilter)
@@ -177,18 +192,14 @@ namespace Sec2_Group1_HappyJumpingFrog
                     }
                 }
             }
-            else
-            {
-                dt.Rows.Add(1, "FF", 0, DateTime.Now.ToString("yyyy-MM-dd"));
-            }
+
 
             dgvScores.DataSource = dt;
 
-            // [จุดสำคัญ] กำหนดสัดส่วนความกว้าง (FillWeight) แทนการระบุพิกเซล (.Width) เพื่อให้พอดีกรอบเป๊ะๆ
-            dgvScores.Columns["Rank"].FillWeight = 15;   // ช่องอันดับ (แคบ)
-            dgvScores.Columns["Player"].FillWeight = 40; // ช่องชื่อผู้เล่น (กว้าง)
-            dgvScores.Columns["Score"].FillWeight = 20;  // ช่องคะแนน (กลาง)
-            dgvScores.Columns["Date"].FillWeight = 35;   // ช่องวันที่ (กว้างพอดี)
+            dgvScores.Columns["Rank"].FillWeight = 15;
+            dgvScores.Columns["Player"].FillWeight = 40;
+            dgvScores.Columns["Score"].FillWeight = 20;
+            dgvScores.Columns["Date"].FillWeight = 35;
         }
     }
 }
