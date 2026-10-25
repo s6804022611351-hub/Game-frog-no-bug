@@ -32,13 +32,20 @@
             btnMenu = new Button();
             btnSound = new Button();
             btnMusic = new Button();
+            btnClose = new Button();
             SuspendLayout();
             // 
             // btnContinue
             // 
-            btnContinue.Location = new Point(105, 79);
+            btnContinue.FlatAppearance.BorderSize = 0;
+            btnContinue.FlatAppearance.MouseDownBackColor = Color.Transparent;
+            btnContinue.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            btnContinue.FlatStyle = FlatStyle.Flat;
+            btnContinue.Font = new Font("Sylfaen", 20.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnContinue.ForeColor = SystemColors.ButtonHighlight;
+            btnContinue.Location = new Point(99, 43);
             btnContinue.Name = "btnContinue";
-            btnContinue.Size = new Size(119, 42);
+            btnContinue.Size = new Size(269, 69);
             btnContinue.TabIndex = 0;
             btnContinue.Text = "Continue";
             btnContinue.UseVisualStyleBackColor = true;
@@ -46,9 +53,15 @@
             // 
             // btnMenu
             // 
-            btnMenu.Location = new Point(105, 140);
+            btnMenu.FlatAppearance.BorderSize = 0;
+            btnMenu.FlatAppearance.MouseDownBackColor = Color.Transparent;
+            btnMenu.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            btnMenu.FlatStyle = FlatStyle.Flat;
+            btnMenu.Font = new Font("Sylfaen", 20.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnMenu.ForeColor = SystemColors.ButtonHighlight;
+            btnMenu.Location = new Point(99, 145);
             btnMenu.Name = "btnMenu";
-            btnMenu.Size = new Size(119, 42);
+            btnMenu.Size = new Size(282, 73);
             btnMenu.TabIndex = 1;
             btnMenu.Text = "Menu";
             btnMenu.UseVisualStyleBackColor = true;
@@ -56,34 +69,64 @@
             // 
             // btnSound
             // 
-            btnSound.Location = new Point(105, 199);
+            btnSound.FlatAppearance.BorderSize = 0;
+            btnSound.FlatAppearance.MouseDownBackColor = Color.Transparent;
+            btnSound.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            btnSound.FlatStyle = FlatStyle.Flat;
+            btnSound.Font = new Font("Sylfaen", 20.25F, FontStyle.Bold);
+            btnSound.ForeColor = SystemColors.ButtonHighlight;
+            btnSound.Location = new Point(99, 247);
             btnSound.Name = "btnSound";
-            btnSound.Size = new Size(119, 42);
+            btnSound.Size = new Size(282, 67);
             btnSound.TabIndex = 2;
-            btnSound.Text = "Sound On";
+            btnSound.Text = "Sound";
             btnSound.UseVisualStyleBackColor = true;
             btnSound.Click += btnSound_Click;
             // 
             // btnMusic
             // 
-            btnMusic.Location = new Point(105, 263);
+            btnMusic.FlatAppearance.BorderSize = 0;
+            btnMusic.FlatAppearance.MouseDownBackColor = Color.Transparent;
+            btnMusic.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            btnMusic.FlatStyle = FlatStyle.Flat;
+            btnMusic.Font = new Font("Sylfaen", 20.25F, FontStyle.Bold);
+            btnMusic.ForeColor = SystemColors.ButtonHighlight;
+            btnMusic.Location = new Point(99, 348);
             btnMusic.Name = "btnMusic";
-            btnMusic.Size = new Size(119, 42);
+            btnMusic.Size = new Size(282, 72);
             btnMusic.TabIndex = 3;
-            btnMusic.Text = "button4";
+            btnMusic.Text = "Music";
             btnMusic.UseVisualStyleBackColor = true;
             btnMusic.Click += btnMusic_Click;
+            // 
+            // btnClose
+            // 
+            btnClose.FlatAppearance.BorderSize = 0;
+            btnClose.FlatAppearance.MouseDownBackColor = Color.Transparent;
+            btnClose.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            btnClose.FlatStyle = FlatStyle.Flat;
+            btnClose.Location = new Point(374, 16);
+            btnClose.Name = "btnClose";
+            btnClose.Size = new Size(46, 45);
+            btnClose.TabIndex = 4;
+            btnClose.UseVisualStyleBackColor = true;
+            btnClose.Click += btnClose_Click;
             // 
             // UserControlPause
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.Transparent;
+            BackgroundImage = Properties.Resources.Subject2;
+            BackgroundImageLayout = ImageLayout.Stretch;
+            Controls.Add(btnClose);
             Controls.Add(btnMusic);
             Controls.Add(btnSound);
             Controls.Add(btnMenu);
             Controls.Add(btnContinue);
+            DoubleBuffered = true;
             Name = "UserControlPause";
-            Size = new Size(337, 379);
+            Size = new Size(473, 461);
             ResumeLayout(false);
         }
 
@@ -93,5 +136,6 @@
         private Button btnMenu;
         private Button btnSound;
         private Button btnMusic;
+        private Button btnClose;
     }
 }
