@@ -90,7 +90,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             for (int i = 0; i < 5; i++)
             {
                 float x = padding + (i * step);
-                float y = 10;
+                float y = 20; // 📍 ลองปรับลงมาจาก 10 เพื่อไม่ให้ชิดขอบบนเกินไป
                 _lotuses.Add(new TargetLotus(lotusImg, x, y, lotusWidth, lotusHeight));
             }
 
@@ -135,7 +135,41 @@ namespace Sec2_Group1_HappyJumpingFrog
             // 2. ดอกบัว 5 ดอก
             foreach (var lotus in _lotuses)
             {
-                lotus.Draw(g);
+                if (!lotus.IsCollected)
+                {
+                    g.DrawImage(Properties.Resources.lotus, lotus.X, lotus.Y, lotus.Width, lotus.Height);
+                }
+                
+
+                // 📍 2. ถ้าดอกบัวถูกเก็บไปแล้ว ให้วาดวงกลมสีดำทับ เพื่อแสดงว่าจุดนี้เคยเก็บไปแล้ว
+                if (lotus.IsCollected)
+                {
+                    lotus.Draw(g);
+                }
+                if (_frog.Intersects(lotus))
+                {
+                    if (!lotus.IsCollected)
+                    {
+                        // ยังไม่เคยเก็บ -> ได้คะแนน และวาร์ปกบกลับจุดเริ่มต้น
+                        lotus.IsCollected = true;
+                        _goal++;
+                        _score += 1;
+
+                        _frog.X = StartX;
+                        _frog.Y = StartY;
+
+                        if (_goal >= 5)
+                        {
+                            HandleLevelClear();
+                        }
+                    }
+                    else
+                    {
+                        // 📍 เคยเก็บไปแล้ว แต่กบกระโดดมาลงจุดเดิม -> ตายทันที!
+                        _frog.Die();
+                    }
+                    break;
+                }
             }
 
             // 3. แม่น้ำและปลา
@@ -453,7 +487,7 @@ namespace Sec2_Group1_HappyJumpingFrog
                 }
                 return true;
             }
-
+                
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
