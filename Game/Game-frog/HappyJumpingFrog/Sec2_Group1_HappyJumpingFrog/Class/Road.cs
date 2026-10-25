@@ -7,7 +7,7 @@ namespace Sec2_Group1_HappyJumpingFrog.Class
 {
     public class Road
     {
-        private const int EnemySize = 50;
+        private const int EnemySize = EnemyMonster.EnemyHeight;
 
         public List<EnemyMonster> Enemies { get; private set; }
 
