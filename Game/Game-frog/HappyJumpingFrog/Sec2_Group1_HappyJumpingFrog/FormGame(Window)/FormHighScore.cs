@@ -141,7 +141,6 @@ namespace Sec2_Group1_HappyJumpingFrog
             if (File.Exists(filePath))
             {
                 string[] lines = File.ReadAllLines(filePath);
-                int rank = 1;
 
                 foreach (string line in lines)
                 {
@@ -178,7 +177,6 @@ namespace Sec2_Group1_HappyJumpingFrog
                         }
                         else if (filter == "MY SCORES")
                         {
-                            // กรองตามชื่อผู้เล่นที่กรอกเข้ามา (ถ้าไม่มีการส่งชื่อมา จะใช้ค่า "FF" เป็นค่าเริ่มต้น)
                             string targetUser = string.IsNullOrEmpty(currentUserName) ? "FF" : currentUserName;
                             if (playerName.Equals(targetUser, StringComparison.OrdinalIgnoreCase))
                                 passFilter = true;
@@ -186,15 +184,25 @@ namespace Sec2_Group1_HappyJumpingFrog
 
                         if (passFilter)
                         {
-                            dt.Rows.Add(rank, playerName, score, dateStr);
-                            rank++;
+                            // ยังไม่ใส่ Rank ตอนนี้ เดี๋ยวมาจัดเรียงและใส่ทีหลัง
+                            dt.Rows.Add(0, playerName, score, dateStr);
                         }
                     }
                 }
             }
 
+            // --- [จุดที่แก้ไข] จัดเรียงข้อมูลใน DataTable ให้คะแนนมากที่สุดขึ้นก่อน (Score DESC) ---
+            DataView dv = dt.DefaultView;
+            dv.Sort = "Score DESC";
+            DataTable sortedDt = dv.ToTable();
 
-            dgvScores.DataSource = dt;
+            // กำหนดเลข Rank ใหม่ตามลำดับคะแนนที่เรียงแล้ว (1, 2, 3, ...)
+            for (int i = 0; i < sortedDt.Rows.Count; i++)
+            {
+                sortedDt.Rows[i]["Rank"] = i + 1;
+            }
+
+            dgvScores.DataSource = sortedDt;
 
             dgvScores.Columns["Rank"].FillWeight = 15;
             dgvScores.Columns["Player"].FillWeight = 40;
