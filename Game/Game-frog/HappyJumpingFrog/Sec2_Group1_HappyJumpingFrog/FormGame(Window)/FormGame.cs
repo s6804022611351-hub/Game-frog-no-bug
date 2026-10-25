@@ -199,10 +199,7 @@ namespace Sec2_Group1_HappyJumpingFrog
 
             // 7. แผงเมนูด้านขวา
             DrawSidePanel(g);
-
-            // 8. ข้อความ PAUSED
-            if (_paused)
-                DrawCenteredText(g, "PAUSED", _titleFont, _fieldWidth / 2f, WorldHeight / 2f - 15);
+       
         }
 
         private void DrawSidePanel(Graphics g)
@@ -288,9 +285,73 @@ namespace Sec2_Group1_HappyJumpingFrog
             _paused = !_paused;
             timerGame.Enabled = !_paused;
 
-            // ตอนเล่นต่อ เริ่มนับใหม่ เพื่อไม่ให้นับเวลาที่หยุดเกมอยู่
-            if (!_paused)
+            if (_paused)
+            {
+                // เมื่อกดหยุดเกม ให้เรียกแสดงหน้าต่าง Pause แบบ UserControl ซ้อนทับ
+                ShowPauseOverlay();
+            }
+            else
+            {
+                // 📌 เพิ่มส่วนนี้: เมื่อกดเล่นต่อ ให้ลบหน้าต่าง UserControlPause ออกจากหน้าจอ
+                foreach (Control c in this.Controls.OfType<UserControlPause>().ToList())
+                {
+                    this.Controls.Remove(c);
+                }
+
+                // ตอนเล่นต่อ เริ่มนับเวลาใหม่ เพื่อไม่ให้นับช่วงที่หยุดเกมไป
                 _lastElapsed = _stopwatch.Elapsed.TotalSeconds;
+            }
+        }
+        private void ShowPauseOverlay()
+        {
+            // ป้องกันการเปิดซ้ำ
+            foreach (Control c in this.Controls)
+            {
+                if (c is UserControlPause) return;
+            }
+
+            // สร้างหน้า Pause และส่งสถานะเสียง/เพลงปัจจุบันเข้าไปด้วย
+            UserControlPause pausePanel = new UserControlPause(_soundOn, _musicOn);
+
+            // จัดตำแหน่งให้อยู่ตรงกลางพื้นที่เกม
+            pausePanel.Location = new Point(
+                (int)((_fieldWidth - pausePanel.Width) / 2f),
+                (int)((WorldHeight - pausePanel.Height) / 2f)
+            );
+
+            // ปุ่ม Continue (เล่นต่อ)
+            pausePanel.ContinueClicked += (s, ev) => {
+                this.Controls.Remove(pausePanel);
+                _paused = false;
+                timerGame.Start();
+                _lastElapsed = _stopwatch.Elapsed.TotalSeconds;
+            };
+
+            // ปุ่ม Menu (กลับหน้าหลัก)
+            pausePanel.MenuClicked += (s, ev) => {
+                this.Hide();
+
+                FormMenu menuForm = new FormMenu();
+                menuForm.ShowDialog(this);
+
+                // 3. ปิดหน้าจอ Game Over นี้ลง
+                this.Close();
+            };
+
+            // ปุ่ม Sound On/Off
+            pausePanel.SoundToggleClicked += (s, ev) => {
+                _soundOn = !_soundOn;
+                Invalidate();
+            };
+
+            // ปุ่ม Music On/Off
+            pausePanel.MusicToggleClicked += (s, ev) => {
+                _musicOn = !_musicOn;
+                Invalidate();
+            };
+
+            this.Controls.Add(pausePanel);
+            pausePanel.BringToFront();
         }
 
         private FriendMonster FindFishUnderFrog()
