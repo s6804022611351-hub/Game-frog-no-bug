@@ -18,7 +18,7 @@ namespace Sec2_Group1_HappyJumpingFrog
 
         private void FormMenu_Load(object sender, EventArgs e)
         {
-            ////////////
+           
         }
 
         private void btnplay_Click(object sender, EventArgs e)
