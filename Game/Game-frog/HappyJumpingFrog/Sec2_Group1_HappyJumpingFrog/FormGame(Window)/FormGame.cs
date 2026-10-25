@@ -1,11 +1,13 @@
 ﻿using HappyJumpingFrog;
 using Sec2_Group1_HappyJumpingFrog.Class;
+using Sec2_Group1_HappyJumpingFrog.GameOver;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Sec2_Group1_HappyJumpingFrog
 {
@@ -385,10 +387,17 @@ namespace Sec2_Group1_HappyJumpingFrog
             // 6. เช็ก Game Over (หัวใจหมด หรือ เวลาหมด)
             if (_frog.IsGameOver || _gameTimer.IsTimeUp)
             {
-                timerGame.Stop();
-                FormGameOver gameOverForm = new FormGameOver(_score);
+                // 1. หยุด Timer ของเกมทันทีเพื่อไม่ให้ลูปสั่งเปิดฟอร์มซ้ำ
+                timerGame.Stop(); ; // หรือ timerGame.Stop(); ตามชื่อ Timer ของคุณ
+
+                // 2. สั่งซ่อนหน้าเกม
                 this.Hide();
-                gameOverForm.ShowDialog(this);
+
+                // 3. เปิดหน้า Level Failed
+                FormLevelFailed failedForm = new FormLevelFailed(_score);
+                failedForm.ShowDialog(this);
+
+                // 4. เมื่อปิดหน้า Level Failed แล้วค่อยปิดหน้าเกมถาวร
                 this.Close();
                 return;
             }

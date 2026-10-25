@@ -36,7 +36,7 @@ namespace Sec2_Group1_HappyJumpingFrog
 
 
 
-        // ปุ่ม Submit Score (ถ้าจะส่งคะแนนไปหน้ากรอกชื่อต่อ)
+        // ปุ่ม Submit Score (ถ้าจะส่งคะแนนไปหน้ากรอกชื่อต่อ)w
         private void btnSubmitScore_Click(object sender, EventArgs e)
         {
             FormSubmitScore submitForm = new FormSubmitScore(currentScore);
