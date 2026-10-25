@@ -155,7 +155,21 @@ namespace Sec2_Group1_HappyJumpingFrog
 
             PositionLotuses();
         }
-
+        private void UpdateLevelBackground()
+        {
+            if (_level == 2)
+            {
+                _background = Properties.Resources.background2; // รูปสำหรับด่าน 2
+            }
+            else if (_level == 3)
+            {
+                _background = Properties.Resources.background2; // ด่าน 3 (ใช้รูปด่าน 2 หรือเปลี่ยนเป็นรูปอื่นตามต้องการ)
+            }
+            else
+            {
+                _background = Properties.Resources.background;  // ด่าน 1 ใช้รูปเดิม
+            }
+        }
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
@@ -611,7 +625,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             _level++;
             _subLevel = 1;
             _paused = false;
-
+            UpdateLevelBackground();
             BuildLotuses();
 
             // สุ่มตำแหน่งหัวใจใหม่สำหรับด่านถัดไป
@@ -642,7 +656,6 @@ namespace Sec2_Group1_HappyJumpingFrog
             Invalidate();
         }
 
-        // ==========================================
         // 7. ปุ่มควบคุม (WASD, ปุ่มลูกศร, P, Z-B, N)
         // ==========================================
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
