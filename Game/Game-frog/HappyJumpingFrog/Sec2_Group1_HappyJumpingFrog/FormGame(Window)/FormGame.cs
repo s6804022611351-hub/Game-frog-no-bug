@@ -323,6 +323,12 @@ namespace Sec2_Group1_HappyJumpingFrog
             pausePanel.ContinueClicked += (s, ev) => {
                 this.Controls.Remove(pausePanel);
                 _paused = false;
+
+                // 📌 เพิ่มคำสั่งคืนค่า Focus ให้ Form หลัก เพื่อให้กดปุ่มเดินต่อได้ทันที
+                this.Activate();
+                this.Focus();
+                _lastHopTime = DateTime.MinValue; // รีเซ็ตเวลาหน่วงการกระโดดเผื่อค้าง
+
                 timerGame.Start();
                 _lastElapsed = _stopwatch.Elapsed.TotalSeconds;
             };
@@ -449,21 +455,74 @@ namespace Sec2_Group1_HappyJumpingFrog
             if (_frog.IsGameOver || _gameTimer.IsTimeUp)
             {
                 // 1. หยุด Timer ของเกมทันทีเพื่อไม่ให้ลูปสั่งเปิดฟอร์มซ้ำ
-                timerGame.Stop(); ; // หรือ timerGame.Stop(); ตามชื่อ Timer ของคุณ
+                timerGame.Stop();
 
-                // 2. สั่งซ่อนหน้าเกม
-                this.Hide();
+                // 2. เรียกแสดงหน้า Level Failed แบบ UserControl ซ้อนทับ (สไตล์เดียวกับ Pause)
+                ShowLevelFailedOverlay();
 
-                // 3. เปิดหน้า Level Failed
-                FormLevelFailed failedForm = new FormLevelFailed(_score);
-                failedForm.ShowDialog(this);
-
-                // 4. เมื่อปิดหน้า Level Failed แล้วค่อยปิดหน้าเกมถาวร
-                this.Close();
                 return;
             }
-
             Invalidate();
+        }
+        private void ShowLevelFailedOverlay()
+        {
+            // ป้องกันการเปิดหน้าต่าง Level Failed ซ้ำซ้อน
+            foreach (Control c in this.Controls)
+            {
+                if (c is UserControlLevelFailed) return;
+            }
+
+            // 1. สร้างหน้า Level Failed ขึ้นมาใหม่ผ่านโค้ด
+            UserControlLevelFailed failedPanel = new UserControlLevelFailed(_score);
+
+            // 2. จัดตำแหน่งให้อยู่ตรงกลางพื้นที่เกมพอดี
+            failedPanel.TryAgainClicked += (s, ev) => 
+            {
+                this.Controls.Remove(failedPanel);
+
+                // รีเซ็ตค่าเกมใหม่
+                _level = 1;
+                _subLevel = 1;
+                _score = 0;
+                _paused = false;
+
+                BuildLotuses();
+
+                // แทนที่จะ new PlayerFrog ใหม่ ให้รีเซ็ตตำแหน่งและคืนค่าชีวิต/สถานะแทน
+                _frog.X = StartX;
+                _frog.Y = StartY;
+                _frog.Lives = 3; // หรือจำนวนชีวิตเริ่มต้นของคุณ
+                                 // _frog.Reset(); // ถ้าในคลาส PlayerFrog มีเมธอด Reset สามารถเรียกใช้ตรงนี้ได้ครับ
+
+                _gameTimer.Reset(LevelSeconds[0]);
+                _lastElapsed = _stopwatch.Elapsed.TotalSeconds;
+                _lastHopTime = DateTime.MinValue; // รีเซ็ตเวลาหน่วงการกระโดด
+
+                // คืนค่า Focus ให้ Form หลัก เพื่อให้กดปุ่มลูกศรหรือ WASD เดินได้ทันที
+                this.Activate();
+                this.Focus();
+
+                timerGame.Start();
+                Invalidate();
+            };
+
+            // 4. เมื่อกดปุ่ม End / Submit Score (กลับหน้าเมนูหลัก)
+            failedPanel.EndGameClicked += (s, ev) => {
+                // 1. ซ่อนหน้าเกมหลักก่อน
+                this.Hide();
+
+                // 2. สร้างและเปิดหน้า Game Over โดยส่งคะแนน _score ข้ามไป
+                FormGameOver gameOverForm = new FormGameOver(_score);
+                gameOverForm.ShowDialog(this);
+
+                // 3. ปิดหน้าเกมหลักถาวรหลังจากปิดหน้า Game Over แล้ว
+                this.Close();
+            };
+
+
+            // 5. นำแปะลงใน Controls ของ Form หลัก และดึงขึ้นมาไว้บนสุด
+            this.Controls.Add(failedPanel);
+            failedPanel.BringToFront();
         }
 
         // ==========================================

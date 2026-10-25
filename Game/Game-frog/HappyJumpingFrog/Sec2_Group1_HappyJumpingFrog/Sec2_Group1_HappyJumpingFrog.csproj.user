@@ -16,14 +16,14 @@
     <Compile Update="GameOver\FormGameOver.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Update="GameOver\FormLevelFailed.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Update="Score\FormScoreSubmitted.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="Score\FormSubmitScore.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GameOver\UserControlLevelFailed.cs">
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Update="UserControlPause.cs">
       <SubType>UserControl</SubType>

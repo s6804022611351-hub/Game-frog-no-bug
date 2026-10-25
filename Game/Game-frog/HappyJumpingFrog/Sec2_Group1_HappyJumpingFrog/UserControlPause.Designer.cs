@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UserControlPause));
             btnContinue = new Button();
             btnMenu = new Button();
             btnSound = new Button();
@@ -41,11 +42,11 @@
             btnContinue.FlatAppearance.MouseDownBackColor = Color.Transparent;
             btnContinue.FlatAppearance.MouseOverBackColor = Color.Transparent;
             btnContinue.FlatStyle = FlatStyle.Flat;
-            btnContinue.Font = new Font("Sylfaen", 20.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnContinue.Font = new Font("Sylfaen", 26.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnContinue.ForeColor = SystemColors.ButtonHighlight;
-            btnContinue.Location = new Point(99, 43);
+            btnContinue.Location = new Point(47, 41);
             btnContinue.Name = "btnContinue";
-            btnContinue.Size = new Size(269, 69);
+            btnContinue.Size = new Size(388, 76);
             btnContinue.TabIndex = 0;
             btnContinue.Text = "Continue";
             btnContinue.UseVisualStyleBackColor = true;
@@ -57,11 +58,11 @@
             btnMenu.FlatAppearance.MouseDownBackColor = Color.Transparent;
             btnMenu.FlatAppearance.MouseOverBackColor = Color.Transparent;
             btnMenu.FlatStyle = FlatStyle.Flat;
-            btnMenu.Font = new Font("Sylfaen", 20.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnMenu.Font = new Font("Sylfaen", 26.25F, FontStyle.Bold);
             btnMenu.ForeColor = SystemColors.ButtonHighlight;
-            btnMenu.Location = new Point(99, 145);
+            btnMenu.Location = new Point(47, 145);
             btnMenu.Name = "btnMenu";
-            btnMenu.Size = new Size(282, 73);
+            btnMenu.Size = new Size(388, 73);
             btnMenu.TabIndex = 1;
             btnMenu.Text = "Menu";
             btnMenu.UseVisualStyleBackColor = true;
@@ -73,11 +74,11 @@
             btnSound.FlatAppearance.MouseDownBackColor = Color.Transparent;
             btnSound.FlatAppearance.MouseOverBackColor = Color.Transparent;
             btnSound.FlatStyle = FlatStyle.Flat;
-            btnSound.Font = new Font("Sylfaen", 20.25F, FontStyle.Bold);
+            btnSound.Font = new Font("Sylfaen", 26.25F, FontStyle.Bold);
             btnSound.ForeColor = SystemColors.ButtonHighlight;
-            btnSound.Location = new Point(99, 247);
+            btnSound.Location = new Point(47, 239);
             btnSound.Name = "btnSound";
-            btnSound.Size = new Size(282, 67);
+            btnSound.Size = new Size(388, 83);
             btnSound.TabIndex = 2;
             btnSound.Text = "Sound";
             btnSound.UseVisualStyleBackColor = true;
@@ -89,11 +90,11 @@
             btnMusic.FlatAppearance.MouseDownBackColor = Color.Transparent;
             btnMusic.FlatAppearance.MouseOverBackColor = Color.Transparent;
             btnMusic.FlatStyle = FlatStyle.Flat;
-            btnMusic.Font = new Font("Sylfaen", 20.25F, FontStyle.Bold);
+            btnMusic.Font = new Font("Sylfaen", 26.25F, FontStyle.Bold);
             btnMusic.ForeColor = SystemColors.ButtonHighlight;
-            btnMusic.Location = new Point(99, 348);
+            btnMusic.Location = new Point(47, 341);
             btnMusic.Name = "btnMusic";
-            btnMusic.Size = new Size(282, 72);
+            btnMusic.Size = new Size(388, 79);
             btnMusic.TabIndex = 3;
             btnMusic.Text = "Music";
             btnMusic.UseVisualStyleBackColor = true;
@@ -105,7 +106,7 @@
             btnClose.FlatAppearance.MouseDownBackColor = Color.Transparent;
             btnClose.FlatAppearance.MouseOverBackColor = Color.Transparent;
             btnClose.FlatStyle = FlatStyle.Flat;
-            btnClose.Location = new Point(374, 16);
+            btnClose.Location = new Point(411, 18);
             btnClose.Name = "btnClose";
             btnClose.Size = new Size(46, 45);
             btnClose.TabIndex = 4;
@@ -117,7 +118,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Transparent;
-            BackgroundImage = Properties.Resources.Subject2;
+            BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
             BackgroundImageLayout = ImageLayout.Stretch;
             Controls.Add(btnClose);
             Controls.Add(btnMusic);
