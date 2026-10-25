@@ -46,14 +46,11 @@ namespace Sec2_Group1_HappyJumpingFrog
 
         private void btnsub_score_Click(object sender, EventArgs e)
         {
-            this.Hide();
 
             // เปิดหน้ากรอกชื่อ/บันทึกคะแนนแบบค้างไว้
             FormSubmitScore submitForm = new FormSubmitScore(currentScore);
             submitForm.ShowDialog(this);
 
-            // ปิดหน้า Game Over นี้อย่างถาวรเมื่อใช้งานเสร็จ
-            this.Close();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -61,11 +58,8 @@ namespace Sec2_Group1_HappyJumpingFrog
 
             this.Hide();
 
-            // 1. สร้างหน้าเกมใหม่ขึ้นมา
-            FormGame newGame = new FormGame();
-
-            // 2. เปิดหน้าเกมใหม่ขึ้นมา
-            newGame.Show();
+            FormMenu menuForm = new FormMenu();
+            menuForm.ShowDialog(this);
 
             // 3. ปิดหน้าจอ Game Over นี้ลง
             this.Close();

@@ -95,7 +95,9 @@
             Controls.Add(btnsub_score);
             Controls.Add(Score);
             Controls.Add(label1);
+            FormBorderStyle = FormBorderStyle.None;
             Name = "FormGameOver";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "FormGameOver";
             Load += FormGameOver_Load;
             ResumeLayout(false);
