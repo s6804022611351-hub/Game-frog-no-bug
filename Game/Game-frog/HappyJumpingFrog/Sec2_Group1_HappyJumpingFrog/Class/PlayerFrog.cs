@@ -53,7 +53,7 @@ namespace HappyJumpingFrog
 
         private readonly float _startX, _startY;
 
-        public int Lives { get; private set; }
+        public int Lives { get; set; } = 3;
         public bool IsGameOver { get { return Lives <= 0; } }
 
         public PlayerFrog(Image sprite, float x, float y)

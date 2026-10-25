@@ -18,6 +18,11 @@ namespace Sec2_Group1_HappyJumpingFrog
         private PlayerFrog _frog;              // ตัวละครกบของผู้เล่น
         private Road _road;                    // วัตถุจัดการถนนและศัตรูบนถนน
         private Image _background;             // รูปภาพพื้นหลังเกม
+        private Items _heartItem;              // ไอเท็มหัวใจ
+
+        private int _lives = 5;
+        private const float HeartWidth = 70f;  // ความกว้างไอเท็มหัวใจ
+        private const float HeartHeight = 40f; // ความสูงไอเท็มหัวใจ
 
         // ค่าคงที่ขนาดหน้าจอและพื้นที่เล่นเกม
         private const int WorldHeight = 650;   // ความสูงพื้นที่เกม
@@ -45,9 +50,9 @@ namespace Sec2_Group1_HappyJumpingFrog
         private bool _soundOn = true;          // สถานะเสียง SFX
         private bool _musicOn = true;          // สถานะเพลง BGM
 
-        // 📍 หน่วงเวลาการเดิน/กระโดด 0.25 วินาที (250 ms)
+        // 📍 หน่วงเวลาการเดิน/กระโดด (100 ms = 0.1 วินาที)
         private DateTime _lastHopTime = DateTime.MinValue;
-        private const double HopCooldownMs = 250;
+        private const double HopCooldownMs = 100;
 
         // แบบฟอนต์แสดงผล
         private readonly Font _titleFont = new Font("Segoe UI", 18, FontStyle.Bold);
@@ -77,6 +82,10 @@ namespace Sec2_Group1_HappyJumpingFrog
 
             river = new River(_fieldWidth);
 
+            // สร้างไอเท็มหัวใจและสุ่มตำแหน่งบนแมพ
+            _heartItem = new Items(Properties.Resources.heart, 0, 0, HeartWidth, HeartHeight);
+            _heartItem.SpawnRandom(_fieldWidth, WorldHeight);
+
             // สร้างดอกบัว 5 ดอก วางบนหญ้าด้านบน
             Image lotusImg = Properties.Resources.lotus;
             float lotusWidth = 110f;
@@ -90,7 +99,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             for (int i = 0; i < 5; i++)
             {
                 float x = padding + (i * step);
-                float y = 20; // 📍 ลองปรับลงมาจาก 10 เพื่อไม่ให้ชิดขอบบนเกินไป
+                float y = 20;
                 _lotuses.Add(new TargetLotus(lotusImg, x, y, lotusWidth, lotusHeight));
             }
 
@@ -132,43 +141,12 @@ namespace Sec2_Group1_HappyJumpingFrog
             // 1. พื้นหลัง
             g.DrawImage(_background, 0, 0, _fieldWidth, WorldHeight);
 
-            // 2. ดอกบัว 5 ดอก
+            // 2. ดอกบัว 5 ดอก (วาดเฉพาะดอกที่ยังไม่ถูกเก็บ)
             foreach (var lotus in _lotuses)
             {
                 if (!lotus.IsCollected)
                 {
                     g.DrawImage(Properties.Resources.lotus, lotus.X, lotus.Y, lotus.Width, lotus.Height);
-                }
-                
-
-                // 📍 2. ถ้าดอกบัวถูกเก็บไปแล้ว ให้วาดวงกลมสีดำทับ เพื่อแสดงว่าจุดนี้เคยเก็บไปแล้ว
-                if (lotus.IsCollected)
-                {
-                    lotus.Draw(g);
-                }
-                if (_frog.Intersects(lotus))
-                {
-                    if (!lotus.IsCollected)
-                    {
-                        // ยังไม่เคยเก็บ -> ได้คะแนน และวาร์ปกบกลับจุดเริ่มต้น
-                        lotus.IsCollected = true;
-                        _goal++;
-                        _score += 1;
-
-                        _frog.X = StartX;
-                        _frog.Y = StartY;
-
-                        if (_goal >= 5)
-                        {
-                            HandleLevelClear();
-                        }
-                    }
-                    else
-                    {
-                        // 📍 เคยเก็บไปแล้ว แต่กบกระโดดมาลงจุดเดิม -> ตายทันที!
-                        _frog.Die();
-                    }
-                    break;
                 }
             }
 
@@ -178,13 +156,16 @@ namespace Sec2_Group1_HappyJumpingFrog
             // 4. ถนนและศัตรู
             _road.Draw(g);
 
-            // 5. ตัวละครกบ
+            // 5. วาดไอเท็มหัวใจ (ถ้า IsActive เป็น true)
+            _heartItem?.Draw(g);
+
+            // 6. ตัวละครกบ
             _frog.Draw(g);
 
-            // 6. แผงเมนูด้านขวา
+            // 7. แผงเมนูด้านขวา
             DrawSidePanel(g);
 
-            // 7. ข้อความ PAUSED
+            // 8. ข้อความ PAUSED
             if (_paused)
                 DrawCenteredText(g, "PAUSED", _titleFont, _fieldWidth / 2f, WorldHeight / 2f - 15);
         }
@@ -210,7 +191,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             DrawCenteredText(g, "Goal:", _titleFont, cx, 180);
             DrawCenteredText(g, _goal + "/5", _valueFont, cx, 215);
             DrawCenteredText(g, "Lives:", _titleFont, cx, 260);
-            DrawCenteredText(g, _frog.Lives.ToString(), _valueFont, cx, 295);
+            DrawCenteredText(g, _lives.ToString(), _valueFont, cx, 295);
 
             DrawButton(g, ButtonRect(0), _paused ? ">" : "II", true);
             DrawButton(g, ButtonRect(1), "SFX", _soundOn);
@@ -301,6 +282,7 @@ namespace Sec2_Group1_HappyJumpingFrog
                 if (_frog.Intersects(enemy))
                 {
                     _frog.Die();
+                    _lives = _frog.Lives;
                     break;
                 }
             }
@@ -313,33 +295,57 @@ namespace Sec2_Group1_HappyJumpingFrog
                 if (fish != null)
                     _frog.X += fish.SwimSpeed;
                 else
+                {
                     _frog.Die();
+                    _lives = _frog.Lives;
+                }
             }
 
             if (_frog.X < -_frog.Width / 2f || _frog.X > _fieldWidth - _frog.Width / 2f)
+            {
                 _frog.Die();
+                _lives = _frog.Lives;
+            }
 
-            // 3. ตรวจจับเก็บดอกบัวในการเล่นปกติ (บวก 1 คะแนน)
+            // 3. ตรวจจับกบเก็บไอเท็มหัวใจ
+            if (_heartItem != null && _heartItem.IsActive && _frog.Intersects(_heartItem))
+            {
+                _heartItem.IsActive = false;
+                _lives++; // เพิ่มจำนวนชีวิต +1
+                if (_frog != null) _frog.Lives = _lives;
+            }
+
+            // 4. ตรวจจับเข้าพื้นที่ดอกบัว
             foreach (var lotus in _lotuses)
             {
-                if (!lotus.IsCollected && _frog.Intersects(lotus))
+                if (_frog.Intersects(lotus))
                 {
-                    lotus.IsCollected = true;
-                    _goal++;
-                    _score += 1;
-
-                    _frog.X = StartX;
-                    _frog.Y = StartY;
-
-                    if (_goal >= 5)
+                    if (!lotus.IsCollected)
                     {
-                        HandleLevelClear();
+                        // ยังไม่เคยเก็บ -> ได้คะแนน วาร์ปกบกลับจุดเริ่มต้น
+                        lotus.IsCollected = true;
+                        _goal++;
+                        _score += 1;
+
+                        _frog.X = StartX;
+                        _frog.Y = StartY;
+
+                        if (_goal >= 5)
+                        {
+                            HandleLevelClear();
+                        }
+                    }
+                    else
+                    {
+                        // 📍 เคยเก็บไปแล้ว แต่กบกระโดดมาลงจุดเดิม -> ตายทันที!
+                        _frog.Die();
+                        _lives = _frog.Lives;
                     }
                     break;
                 }
             }
 
-            // 4. เช็ก Game Over
+            // 5. เช็ก Game Over
             if (_frog.IsGameOver)
             {
                 timerGame.Stop();
@@ -365,7 +371,7 @@ namespace Sec2_Group1_HappyJumpingFrog
                 {
                     lotus.IsCollected = true;
                     _goal++;
-                    _score += 1; // 📍 บวกเพิ่มทีละ 1 คะแนน
+                    _score += 1;
 
                     _frog.X = StartX;
                     _frog.Y = StartY;
@@ -381,7 +387,7 @@ namespace Sec2_Group1_HappyJumpingFrog
         }
 
         // ==========================================
-        // 6. ระบบจัดการด่าน (สิ้นสุดที่ด่าน 3 ทันที)
+        // 6. ระบบจัดการด่าน
         // ==========================================
         private void HandleLevelClear()
         {
@@ -427,6 +433,12 @@ namespace Sec2_Group1_HappyJumpingFrog
                 lotus.IsCollected = false;
             }
 
+            // สุ่มตำแหน่งหัวใจใหม่สำหรับด่านถัดไป
+            if (_heartItem != null)
+            {
+                _heartItem.SpawnRandom(_fieldWidth, WorldHeight);
+            }
+
             _frog.X = StartX;
             _frog.Y = StartY;
 
@@ -446,10 +458,20 @@ namespace Sec2_Group1_HappyJumpingFrog
         }
 
         // ==========================================
-        // 7. ปุ่มควบคุม (WASD, ปุ่มลูกศร, P, Z-B)
+        // 7. ปุ่มควบคุม (WASD, ปุ่มลูกศร, P, Z-B, N)
         // ==========================================
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
+            // 📍 ปุ่มทางลัด N (เพิ่มชีวิต +1)
+            if (keyData == Keys.N)
+            {
+                _lives++;
+                if (_frog != null) _frog.Lives = _lives;
+                Invalidate();
+                return true;
+            }
+
+            // 📍 ปุ่ม P (Pause Game)
             if (keyData == Keys.P)
             {
                 TogglePause();
@@ -457,6 +479,7 @@ namespace Sec2_Group1_HappyJumpingFrog
                 return true;
             }
 
+            // 📍 ปุ่มเก็บดอกบัวทางลัด (Z, X, C, V, B)
             if (!_paused)
             {
                 if (keyData == Keys.Z) { CollectLotusByIndex(0); return true; }
@@ -466,6 +489,7 @@ namespace Sec2_Group1_HappyJumpingFrog
                 if (keyData == Keys.B) { CollectLotusByIndex(4); return true; }
             }
 
+            // 📍 ปุ่มควบคุมการเดิน (WASD และ Arrow Keys)
             Keys moveKey = keyData;
             if (keyData == Keys.W) moveKey = Keys.Up;
             else if (keyData == Keys.S) moveKey = Keys.Down;
@@ -477,17 +501,16 @@ namespace Sec2_Group1_HappyJumpingFrog
             {
                 if (!_paused)
                 {
-                    // 📍 ตรวจสอบว่าผ่านไปอย่างน้อย 0.25 วินาที (250 ms) จากการเดินครั้งล่าสุดหรือยัง
                     if ((DateTime.Now - _lastHopTime).TotalMilliseconds >= HopCooldownMs)
                     {
                         _frog.Hop(moveKey, _fieldWidth, WorldHeight);
-                        _lastHopTime = DateTime.Now; // อัปเดตเวลาการเดินล่าสุด
+                        _lastHopTime = DateTime.Now;
                         Invalidate();
                     }
                 }
                 return true;
             }
-                
+
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
