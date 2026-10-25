@@ -74,5 +74,7 @@ namespace Sec2_Group1_HappyJumpingFrog
         {
             ContinueClicked?.Invoke(this, EventArgs.Empty);
         }
+
+       
     }
 }
