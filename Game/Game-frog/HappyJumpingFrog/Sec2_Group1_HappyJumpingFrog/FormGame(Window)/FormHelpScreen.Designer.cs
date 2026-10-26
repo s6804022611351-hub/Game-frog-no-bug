@@ -48,7 +48,7 @@
             pictureHelp.Dock = DockStyle.Fill;
             pictureHelp.Location = new Point(3, 223);
             pictureHelp.Name = "pictureHelp";
-            pictureHelp.Size = new Size(1394, 403);
+            pictureHelp.Size = new Size(1394, 329);
             pictureHelp.SizeMode = PictureBoxSizeMode.Zoom;
             pictureHelp.TabIndex = 0;
             pictureHelp.TabStop = false;
@@ -56,22 +56,22 @@
             // 
             // label1
             // 
-            label1.Anchor = AnchorStyles.Top;
+            label1.Anchor = AnchorStyles.None;
             label1.AutoSize = true;
             label1.BackColor = Color.Transparent;
             label1.FlatStyle = FlatStyle.Flat;
-            label1.Font = new Font("Javanese Text", 22.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label1.ForeColor = Color.Aquamarine;
+            label1.Font = new Font("Segoe UI", 36F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label1.ForeColor = Color.White;
             label1.ImageAlign = ContentAlignment.TopCenter;
-            label1.Location = new Point(580, 0);
+            label1.Location = new Point(510, 4);
             label1.Name = "label1";
-            label1.Size = new Size(240, 84);
+            label1.Size = new Size(380, 81);
             label1.TabIndex = 1;
             label1.Text = "How to play";
             // 
             // btnBackformHelp
             // 
-            btnBackformHelp.Anchor = AnchorStyles.Bottom;
+            btnBackformHelp.Anchor = AnchorStyles.None;
             btnBackformHelp.BackColor = Color.Transparent;
             btnBackformHelp.BackgroundImage = (Image)resources.GetObject("btnBackformHelp.BackgroundImage");
             btnBackformHelp.BackgroundImageLayout = ImageLayout.Zoom;
@@ -79,14 +79,16 @@
             btnBackformHelp.FlatAppearance.MouseDownBackColor = Color.Transparent;
             btnBackformHelp.FlatAppearance.MouseOverBackColor = Color.Transparent;
             btnBackformHelp.FlatStyle = FlatStyle.Flat;
-            btnBackformHelp.Font = new Font("Javanese Text", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            // 📍 ปรับขนาดฟอนต์ Back เป็น 34pt
+            btnBackformHelp.Font = new Font("Segoe UI", 34F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnBackformHelp.ForeColor = Color.FromArgb(0, 64, 64);
-            btnBackformHelp.Location = new Point(379, 632);
+            btnBackformHelp.Location = new Point(300, 565);
             btnBackformHelp.Name = "btnBackformHelp";
-            btnBackformHelp.Size = new Size(642, 73);
+            // 📍 ขยายขนาดปุ่มเป็น 800 x 130 ใหญ่ชัดเจน
+            btnBackformHelp.Size = new Size(800, 130);
             btnBackformHelp.TabIndex = 2;
             btnBackformHelp.Text = "Back";
-            btnBackformHelp.TextAlign = ContentAlignment.BottomCenter;
+            btnBackformHelp.TextAlign = ContentAlignment.MiddleCenter;
             btnBackformHelp.UseVisualStyleBackColor = false;
             btnBackformHelp.Click += btnBackformHelp_Click;
             // 
@@ -96,18 +98,18 @@
             tableLayoutPanel1.ColumnCount = 1;
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tableLayoutPanel1.Controls.Add(label1, 0, 0);
-            tableLayoutPanel1.Controls.Add(pictureHelp, 0, 2);
             tableLayoutPanel1.Controls.Add(panel1, 0, 1);
+            tableLayoutPanel1.Controls.Add(pictureHelp, 0, 2);
             tableLayoutPanel1.Controls.Add(btnBackformHelp, 0, 3);
             tableLayoutPanel1.Dock = DockStyle.Fill;
-            tableLayoutPanel1.GrowStyle = TableLayoutPanelGrowStyle.FixedSize;
             tableLayoutPanel1.Location = new Point(0, 0);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
             tableLayoutPanel1.RowCount = 4;
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 86F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 21.5434074F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 65.75563F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 12.6453485F));
+            // 📍 ปรับความสูงแถวล่างสุด (Row 3) เป็น 150px เพื่อรองรับปุ่มใหญ่
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 90F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 130F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 150F));
             tableLayoutPanel1.Size = new Size(1400, 708);
             tableLayoutPanel1.TabIndex = 3;
             tableLayoutPanel1.Paint += tableLayoutPanel1_Paint;
@@ -115,27 +117,28 @@
             // panel1
             // 
             panel1.Anchor = AnchorStyles.None;
-            panel1.BackColor = Color.FromArgb(0, 64, 64);
+            panel1.BackColor = Color.FromArgb(180, 15, 30, 55);
             panel1.BackgroundImageLayout = ImageLayout.Zoom;
             panel1.Controls.Add(label2);
-            panel1.Location = new Point(13, 90);
+            panel1.Location = new Point(13, 95);
             panel1.Name = "panel1";
-            panel1.Size = new Size(1374, 125);
+            panel1.Padding = new Padding(15);
+            panel1.Size = new Size(1374, 120);
             panel1.TabIndex = 3;
             panel1.TabStop = true;
             // 
             // label2
             // 
-            label2.AutoSize = true;
+            label2.Dock = DockStyle.Fill;
             label2.BackColor = Color.Transparent;
-            label2.Dock = DockStyle.Top;
-            label2.Font = new Font("Javanese Text", 18F, FontStyle.Italic, GraphicsUnit.Point, 0);
-            label2.ForeColor = Color.Aquamarine;
-            label2.Location = new Point(0, 0);
+            label2.Font = new Font("Segoe UI", 16F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label2.ForeColor = Color.White;
+            label2.Location = new Point(15, 15);
             label2.Name = "label2";
-            label2.Size = new Size(1387, 138);
+            label2.Size = new Size(1344, 90);
             label2.TabIndex = 4;
             label2.Text = "Get your frog safely across the road by don't let's it hits anybody on the road and your frog must stays on \r\nlotus leaf to cross the river to the other side.";
+            label2.TextAlign = ContentAlignment.MiddleCenter;
             label2.Click += label2_Click;
             // 
             // FormHelpScreen
@@ -156,7 +159,6 @@
             tableLayoutPanel1.ResumeLayout(false);
             tableLayoutPanel1.PerformLayout();
             panel1.ResumeLayout(false);
-            panel1.PerformLayout();
             ResumeLayout(false);
         }
 
