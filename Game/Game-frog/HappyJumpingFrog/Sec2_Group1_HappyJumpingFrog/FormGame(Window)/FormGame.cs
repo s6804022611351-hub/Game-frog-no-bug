@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Sec2_Group1_HappyJumpingFrog
@@ -16,25 +17,26 @@ namespace Sec2_Group1_HappyJumpingFrog
         // ==========================================
         private List<TargetLotus> _lotuses = new List<TargetLotus>(); // ลิสต์เก็บดอกบัวของด่านย่อยปัจจุบัน
         private River river;                    // ตัวแปรสำหรับจัดการแม่น้ำและปลา
-        private PlayerFrog _frog;              // ตัวละครกบของผู้เล่น
-        private Road _road;                    // วัตถุจัดการถนนและศัตรูบนถนน
-        private Image _background;             // รูปภาพพื้นหลังเกม
-        private Image _lotusImage;             // เก็บรูปดอกบัวไว้ใช้ซ้ำ
-        private Items _heartItem;              // ไอเท็มหัวใจ
+        private PlayerFrog _frog;               // ตัวละครกบของผู้เล่น
+        private Road _road;                     // วัตถุจัดการถนนและศัตรูบนถนน
+        private Image _background;              // รูปภาพพื้นหลังเกม
+        private Image _lotusImage;              // เก็บรูปดอกบัวไว้ใช้ซ้ำ
+        private Items _heartItem;               // ไอเท็มหัวใจ
 
-        private const float HeartWidth = 70f;  // ความกว้างไอเท็มหัวใจ
-        private const float HeartHeight = 40f; // ความสูงไอเท็มหัวใจ
+        private const float HeartWidth = 70f;   // ความกว้างไอเท็มหัวใจ
+        private const float HeartHeight = 40f;  // ความสูงไอเท็มหัวใจ
 
         // ค่าคงที่ขนาดหน้าจอและพื้นที่เล่นเกม
-        private const int WorldHeight = 650;   // ความสูงพื้นที่เกม
-        private const int PanelWidth = 160;    // ความกว้างแผงเมนูด้านขวา
-        private const int ButtonSize = 64;     // ขนาดปุ่มกดบนแผงขวา
+        private const int WorldHeight = 650;    // ความสูงพื้นที่เกม
+        private const int PanelWidth = 160;     // ความกว้างแผงเมนูด้านขวา
+        private const int ButtonSize = 64;      // ขนาดปุ่มกดบนแผงขวา
+        private const int _fieldWidth = 750;    // ความกว้างสนามเล่นคงที่ 750 พิกเซล
 
         // ค่าคงที่ของถนนและแม่น้ำ
-        private const float RoadTop = 358;     // ขอบบนถนน
-        private const float LaneHeight = 62;   // ความสูงต่อเลน
-        private const int RiverFirstRow = 5;   // แถวแม่น้ำแถวแรก
-        private const int RiverLastRow = 7;    // แถวแม่น้ำแถวสุดท้าย
+        private const float RoadTop = 358;      // ขอบบนถนน
+        private const float LaneHeight = 62;    // ความสูงต่อเลน
+        private const int RiverFirstRow = 5;    // แถวแม่น้ำแถวแรก
+        private const int RiverLastRow = 7;     // แถวแม่น้ำแถวสุดท้าย
 
         // จุดเริ่มต้นของกบ
         private const float StartX = 350;
@@ -46,11 +48,13 @@ namespace Sec2_Group1_HappyJumpingFrog
         private const float LotusCenterY = 50f;   // ตรงกับกึ่งกลางแถวบนสุดที่กบกระโดดไปถึง
         private const int SubLevelCount = 5;      // จำนวนด่านย่อยต่อด่านหลัก
 
+        // ค่าคงที่ความเร็วศัตรูประจำแต่ละด่าน
+        private const float EnemySpeedLevel1 = 2.0f;
+        private const float EnemySpeedLevel2 = 3.2f;
+        private const float EnemySpeedLevel3 = 4.0f;
+
         // เวลาของด่านหลักแต่ละด่าน (วินาที): ด่าน 1 = 1500, ด่าน 2 = 1200, ด่าน 3 = 900
         private static readonly int[] LevelSeconds = { 1500, 1200, 900 };
-
-        private float _scale = 1f;             // สเกลอัตราส่วนย่อ/ขยาย
-        private const int _fieldWidth = 750;        // 📍 กำหนดความกว้างสนามเล่นให้คงที่ 750 พิกเซลเสมอ (ไม่เปลี่ยนตามขนาดจอ)
 
         // นาฬิกาจับเวลาถอยหลัง + ตัววัดเวลาจริงระหว่างเฟรม
         private GameTimer _gameTimer;
@@ -58,14 +62,14 @@ namespace Sec2_Group1_HappyJumpingFrog
         private double _lastElapsed = 0;
 
         // สถานะเกมและคะแนน
-        private int _level = 1;                // ด่านหลักปัจจุบัน (สูงสุด 3)
-        private int _subLevel = 1;             // ด่านย่อยปัจจุบัน (1-5)
-        private int _score = 0;                // คะแนน
-        private int _goal = 0;                 // จำนวนดอกบัวที่เก็บได้ในด่านย่อยนี้
-        private int _goalTarget = 5;           // จำนวนดอกบัวที่ต้องเก็บ (5,4,3,2,1)
-        private bool _paused = false;          // สถานะหยุดเกม
-        private bool _soundOn = true;          // สถานะปุ่ม SFX (ยังเป็นแค่สถานะบนปุ่ม)
-        private bool _musicOn = true;          // สถานะปุ่ม BGM (ยังเป็นแค่สถานะบนปุ่ม)
+        private int _level = 1;                 // ด่านหลักปัจจุบัน (สูงสุด 3)
+        private int _subLevel = 1;              // ด่านย่อยปัจจุบัน (1-5)
+        private int _score = 0;                 // คะแนน
+        private int _goal = 0;                  // จำนวนดอกบัวที่เก็บได้ในด่านย่อยนี้
+        private int _goalTarget = 5;            // จำนวนดอกบัวที่ต้องเก็บ (5,4,3,2,1)
+        private bool _paused = false;           // สถานะหยุดเกม
+        private bool _soundOn = true;           // สถานะปุ่ม SFX
+        private bool _musicOn = true;           // สถานะปุ่ม BGM
 
         // หน่วงเวลาการเดิน/กระโดด (100 ms = 0.1 วินาที)
         private DateTime _lastHopTime = DateTime.MinValue;
@@ -86,7 +90,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             DoubleBuffered = true;               // ลดการกะพริบของหน้าจอ
             ResizeRedraw = true;                 // วาดใหม่เมื่อปรับขนาดหน้าต่าง
             KeyPreview = true;                   // ดักจับคีย์บอร์ดที่ Form ก่อน
-            ClientSize = new Size(750 + PanelWidth, WorldHeight);
+            ClientSize = new Size(_fieldWidth + PanelWidth, WorldHeight);
             UpdateLayout();
 
             // โหลดรูปภาพและสร้างวัตถุเกม
@@ -94,9 +98,8 @@ namespace Sec2_Group1_HappyJumpingFrog
             _lotusImage = Properties.Resources.lotus;
             _frog = new PlayerFrog(Properties.Resources.frog, StartX, StartY);
 
-            _road = new Road(RoadTop, LaneHeight, 3,
-                new Image[] { Properties.Resources.enemy1, Properties.Resources.enemy2 },
-                2f, _fieldWidth);
+            // ปรับความยากและสร้างถนนตามระดับด่านที่ 1
+            SetLevelDifficulty();
 
             river = new River(_fieldWidth);
 
@@ -148,19 +151,22 @@ namespace Sec2_Group1_HappyJumpingFrog
             PositionLotuses();
         }
 
-
         private void UpdateLevelBackground()
         {
-            if (_level == 2 || _level == 3)
+            if (_level == 2)
             {
-                // เช็กชื่อ Resource ให้ตรงกับใน Properties (เช่น background2 หรือ S__4071439)
-                _background = Properties.Resources.background2;
+                _background = Properties.Resources.background2; // ด่าน 2
+            }
+            else if (_level == 3)
+            {
+                _background = Properties.Resources.background3; // ด่าน 3
             }
             else
             {
-                _background = Properties.Resources.background;
+                _background = Properties.Resources.background;  // ด่าน 1
             }
         }
+
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
@@ -169,7 +175,7 @@ namespace Sec2_Group1_HappyJumpingFrog
         }
 
         // ==========================================
-        // 3. การแสดงผลกราฟิก (OnPaint) วาดอย่างเดียว ไม่มีตรรกะเกม
+        // 3. การแสดงผลกราฟิก (OnPaint)
         // ==========================================
         protected override void OnPaint(PaintEventArgs e)
         {
@@ -190,9 +196,9 @@ namespace Sec2_Group1_HappyJumpingFrog
             }
 
             if (river != null) river.Draw(g);
-            _road.Draw(g);
+            _road?.Draw(g);
             _heartItem?.Draw(g);
-            _frog.Draw(g);
+            _frog?.Draw(g);
             DrawSidePanel(g);
 
             if (_paused)
@@ -268,7 +274,10 @@ namespace Sec2_Group1_HappyJumpingFrog
         protected override void OnMouseClick(MouseEventArgs e)
         {
             base.OnMouseClick(e);
-            PointF p = new PointF(e.X / _scale, e.Y / _scale);
+
+            float scaleX = ClientSize.Width / (float)(_fieldWidth + PanelWidth);
+            float scaleY = ClientSize.Height / (float)WorldHeight;
+            PointF p = new PointF(e.X / scaleX, e.Y / scaleY);
 
             if (ButtonRect(0).Contains(p)) TogglePause();
             else if (ButtonRect(1).Contains(p)) _soundOn = !_soundOn;
@@ -284,70 +293,55 @@ namespace Sec2_Group1_HappyJumpingFrog
 
             if (_paused)
             {
-                // เมื่อกดหยุดเกม ให้เรียกแสดงหน้าต่าง Pause แบบ UserControl ซ้อนทับ
                 ShowPauseOverlay();
             }
             else
             {
-                // 📌 เพิ่มส่วนนี้: เมื่อกดเล่นต่อ ให้ลบหน้าต่าง UserControlPause ออกจากหน้าจอ
                 foreach (Control c in this.Controls.OfType<UserControlPause>().ToList())
                 {
                     this.Controls.Remove(c);
                 }
-
-                // ตอนเล่นต่อ เริ่มนับเวลาใหม่ เพื่อไม่ให้นับช่วงที่หยุดเกมไป
                 _lastElapsed = _stopwatch.Elapsed.TotalSeconds;
             }
         }
+
         private void ShowPauseOverlay()
         {
-            // ป้องกันการเปิดซ้ำ
             foreach (Control c in this.Controls)
             {
                 if (c is UserControlPause) return;
             }
 
-            // สร้างหน้า Pause และส่งสถานะเสียง/เพลงปัจจุบันเข้าไปด้วย
             UserControlPause pausePanel = new UserControlPause(_soundOn, _musicOn);
-
-            // จัดตำแหน่งให้อยู่ตรงกลางพื้นที่เกม
             pausePanel.Location = new Point(
                 (int)((_fieldWidth - pausePanel.Width) / 2f),
                 (int)((WorldHeight - pausePanel.Height) / 2f)
             );
 
-            // ปุ่ม Continue (เล่นต่อ)
             pausePanel.ContinueClicked += (s, ev) => {
                 this.Controls.Remove(pausePanel);
                 _paused = false;
 
-                // 📌 เพิ่มคำสั่งคืนค่า Focus ให้ Form หลัก เพื่อให้กดปุ่มเดินต่อได้ทันที
                 this.Activate();
                 this.Focus();
-                _lastHopTime = DateTime.MinValue; // รีเซ็ตเวลาหน่วงการกระโดดเผื่อค้าง
+                _lastHopTime = DateTime.MinValue;
 
                 timerGame.Start();
                 _lastElapsed = _stopwatch.Elapsed.TotalSeconds;
             };
 
-            // ปุ่ม Menu (กลับหน้าหลัก)
             pausePanel.MenuClicked += (s, ev) => {
                 this.Hide();
-
                 FormMenu menuForm = new FormMenu();
                 menuForm.ShowDialog(this);
-
-                // 3. ปิดหน้าจอ Game Over นี้ลง
                 this.Close();
             };
 
-            // ปุ่ม Sound On/Off
             pausePanel.SoundToggleClicked += (s, ev) => {
                 _soundOn = !_soundOn;
                 Invalidate();
             };
 
-            // ปุ่ม Music On/Off
             pausePanel.MusicToggleClicked += (s, ev) => {
                 _musicOn = !_musicOn;
                 Invalidate();
@@ -388,6 +382,10 @@ namespace Sec2_Group1_HappyJumpingFrog
                 if (_frog.Intersects(enemy))
                 {
                     _frog.Die();
+
+                    // 📍 วาร์ปกบกลับจุดเริ่มต้นทันทีที่โดนชน เพื่อไม่ให้โดนคำสั่ง Die() ซ้ำในเฟรมถัดไป
+                    _frog.X = StartX;
+                    _frog.Y = StartY;
                     break;
                 }
             }
@@ -432,7 +430,7 @@ namespace Sec2_Group1_HappyJumpingFrog
                     if (_goal >= _goalTarget)
                     {
                         HandleSubLevelClear();
-                        return;   // ต้อง return เพราะลิสต์ดอกบัวถูกสร้างใหม่แล้ว
+                        return;
                     }
                 }
                 else
@@ -451,51 +449,43 @@ namespace Sec2_Group1_HappyJumpingFrog
             // 6. เช็ก Game Over (หัวใจหมด หรือ เวลาหมด)
             if (_frog.IsGameOver || _gameTimer.IsTimeUp)
             {
-                // 1. หยุด Timer ของเกมทันทีเพื่อไม่ให้ลูปสั่งเปิดฟอร์มซ้ำ
                 timerGame.Stop();
-
-                // 2. เรียกแสดงหน้า Level Failed แบบ UserControl ซ้อนทับ (สไตล์เดียวกับ Pause)
                 ShowLevelFailedOverlay();
-
                 return;
             }
             Invalidate();
         }
+
         private void ShowLevelFailedOverlay()
         {
-            // ป้องกันการเปิดหน้าต่าง Level Failed ซ้ำซ้อน
             foreach (Control c in this.Controls)
             {
                 if (c is UserControlLevelFailed) return;
             }
 
-            // 1. สร้างหน้า Level Failed ขึ้นมาใหม่ผ่านโค้ด
             UserControlLevelFailed failedPanel = new UserControlLevelFailed(_score);
 
-            // 2. จัดตำแหน่งให้อยู่ตรงกลางพื้นที่เกมพอดี
-            failedPanel.TryAgainClicked += (s, ev) => 
+            failedPanel.TryAgainClicked += (s, ev) =>
             {
                 this.Controls.Remove(failedPanel);
 
-                // รีเซ็ตค่าเกมใหม่
                 _level = 1;
                 _subLevel = 1;
                 _score = 0;
                 _paused = false;
 
+                UpdateLevelBackground();
+                SetLevelDifficulty();
                 BuildLotuses();
 
-                // แทนที่จะ new PlayerFrog ใหม่ ให้รีเซ็ตตำแหน่งและคืนค่าชีวิต/สถานะแทน
                 _frog.X = StartX;
                 _frog.Y = StartY;
-                _frog.Lives = 3; // หรือจำนวนชีวิตเริ่มต้นของคุณ
-                                 // _frog.Reset(); // ถ้าในคลาส PlayerFrog มีเมธอด Reset สามารถเรียกใช้ตรงนี้ได้ครับ
+                _frog.Lives = 3;
 
                 _gameTimer.Reset(LevelSeconds[0]);
                 _lastElapsed = _stopwatch.Elapsed.TotalSeconds;
-                _lastHopTime = DateTime.MinValue; // รีเซ็ตเวลาหน่วงการกระโดด
+                _lastHopTime = DateTime.MinValue;
 
-                // คืนค่า Focus ให้ Form หลัก เพื่อให้กดปุ่มลูกศรหรือ WASD เดินได้ทันที
                 this.Activate();
                 this.Focus();
 
@@ -503,27 +493,19 @@ namespace Sec2_Group1_HappyJumpingFrog
                 Invalidate();
             };
 
-            // 4. เมื่อกดปุ่ม End / Submit Score (กลับหน้าเมนูหลัก)
             failedPanel.EndGameClicked += (s, ev) => {
-                // 1. ซ่อนหน้าเกมหลักก่อน
                 this.Hide();
-
-                // 2. สร้างและเปิดหน้า Game Over โดยส่งคะแนน _score ข้ามไป
                 FormGameOver gameOverForm = new FormGameOver(_score);
                 gameOverForm.ShowDialog(this);
-
-                // 3. ปิดหน้าเกมหลักถาวรหลังจากปิดหน้า Game Over แล้ว
                 this.Close();
             };
 
-
-            // 5. นำแปะลงใน Controls ของ Form หลัก และดึงขึ้นมาไว้บนสุด
             this.Controls.Add(failedPanel);
             failedPanel.BringToFront();
         }
 
         // ==========================================
-        // 5. ระบบเก็บดอกบัวทางลัด (Z, X, C, V, B) ปุ่มทดสอบ ลบก่อนส่งงาน
+        // 5. ระบบเก็บดอกบัวทางลัด (Z, X, C, V, B)
         // ==========================================
         private void CollectLotusByIndex(int index)
         {
@@ -557,7 +539,6 @@ namespace Sec2_Group1_HappyJumpingFrog
         {
             if (_subLevel < SubLevelCount)
             {
-                // ขึ้นด่านย่อยถัดไปทันที ดอกบัวลดลงทีละ 1 ใบ (เวลายังเดินต่อ ไม่รีเซ็ต)
                 _subLevel++;
                 BuildLotuses();
 
@@ -568,7 +549,6 @@ namespace Sec2_Group1_HappyJumpingFrog
                 return;
             }
 
-            // ผ่านครบ 5 ด่านย่อย -> ผ่านด่านหลัก
             HandleLevelClear();
         }
 
@@ -611,9 +591,8 @@ namespace Sec2_Group1_HappyJumpingFrog
             _subLevel = 1;
             _paused = false;
 
-            // สลับภาพพื้นหลังตามด่านใหม่
             UpdateLevelBackground();
-
+            SetLevelDifficulty();
             BuildLotuses();
 
             if (_heartItem != null)
@@ -630,14 +609,70 @@ namespace Sec2_Group1_HappyJumpingFrog
             this.Text = $"Happy Jumping Frog - Level {_level}";
 
             timerGame.Start();
-            Invalidate(); // สั่งวาดหน้าจอใหม่ทันที
+            Invalidate();
         }
 
+        private void SetLevelDifficulty()
+        {
+            if (_level == 1)
+            {
+                // 📍 ด่าน 1: 3 เลน (ศัตรูเกิดบนถนนตามปกติ เลนล่างสุดอยู่สูงกว่ากบ)
+                _road = new Road(
+                    RoadTop,
+                    LaneHeight,
+                    3,
+                    new Image[] {
+                Properties.Resources.enemy1,
+                Properties.Resources.enemy2,
+                Properties.Resources.enemy1
+                    },
+                    EnemySpeedLevel1,
+                    _fieldWidth
+                );
+            }
+            else if (_level == 2)
+            {
+                // 📍 ด่าน 2: 4 เลน (ใส่ true เพื่อให้แถวล่างสุดติดกบโผล่มาจากนอกจอทีละตัว)
+                _road = new Road(
+                    RoadTop,
+                    LaneHeight,
+                    4,
+                    new Image[] {
+                Properties.Resources.enemy2,
+                Properties.Resources.enemy1,
+                Properties.Resources.enemy2,
+                Properties.Resources.enemy1
+                    },
+                    EnemySpeedLevel2,
+                    _fieldWidth,
+                    true // 👈 ใส่ true ป้องกันกบโดนชนตายตอนเริ่มด่าน 2
+                );
+            }
+            else if (_level == 3)
+            {
+                // 📍 ด่าน 3: 4 เลน (ใส่ true เช่นกัน เพื่อป้องกันกบตายตอนเริ่มด่าน 3)
+                _road = new Road(
+                    RoadTop,
+                    LaneHeight,
+                    4,
+                    new Image[] {
+                Properties.Resources.enemy2,
+                Properties.Resources.enemy2,
+                Properties.Resources.enemy1,
+                Properties.Resources.enemy2
+                    },
+                    EnemySpeedLevel3,
+                    _fieldWidth,
+                    true // 👈 ใส่ true ป้องกันกบโดนชนตายตอนเริ่มด่าน 3
+                );
+            }
+        }
+
+        // ==========================================
         // 7. ปุ่มควบคุม (WASD, ปุ่มลูกศร, P, Z-B, N)
         // ==========================================
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            // ปุ่มทางลัด N (เพิ่มชีวิต +1) ปุ่มทดสอบ ลบก่อนส่งงาน
             if (keyData == Keys.N)
             {
                 _frog.Lives++;
@@ -645,7 +680,6 @@ namespace Sec2_Group1_HappyJumpingFrog
                 return true;
             }
 
-            // ปุ่ม P (Pause Game)
             if (keyData == Keys.P)
             {
                 TogglePause();
@@ -653,7 +687,6 @@ namespace Sec2_Group1_HappyJumpingFrog
                 return true;
             }
 
-            // ปุ่มเก็บดอกบัวทางลัด (Z, X, C, V, B) ปุ่มทดสอบ ลบก่อนส่งงาน
             if (!_paused)
             {
                 if (keyData == Keys.Z) { CollectLotusByIndex(0); return true; }
@@ -663,12 +696,11 @@ namespace Sec2_Group1_HappyJumpingFrog
                 if (keyData == Keys.B) { CollectLotusByIndex(4); return true; }
                 if (keyData == Keys.L)
                 {
-                    StartNextLevel(); // กด L เพื่อข้ามไปด่านถัดไปทันที
+                    StartNextLevel();
                     return true;
                 }
             }
 
-            // ปุ่มควบคุมการเดิน (WASD และ Arrow Keys)
             Keys moveKey = keyData;
             if (keyData == Keys.W) moveKey = Keys.Up;
             else if (keyData == Keys.S) moveKey = Keys.Down;

@@ -10,6 +10,8 @@ namespace HappyJumpingFrog
     {
 
         private static readonly float[] RowCenters = { 590, 513, 451, 389, 334, 270, 200, 130, 50 };
+        private DateTime _invulnerableUntil = DateTime.MinValue; //อมตะ
+        public bool IsInvulnerable => DateTime.Now < _invulnerableUntil;
 
         // แถวที่กบอยู่ตอนนี้ (หาแถวที่ใกล้ที่สุด)
         public int CurrentRow
@@ -64,12 +66,20 @@ namespace HappyJumpingFrog
             Lives = 5;
         }
 
-        
+
         public void Die()
         {
+            // ถ้ากบยังอยู่ในสถานะอมตะ จะไม่โดนคำสั่ง Die ซ้ำ
+            if (IsInvulnerable) return;
+
             Lives--;
-            X = _startX;     // ส่งกบกลับจุดเริ่มต้น
-            Y = _startY;
+
+            // วาร์ปกบกลับจุดเกิดทันที
+            this.X = 350f;
+            this.Y = 565f;
+
+            // ตั้งเวลาให้อมตะเป็นเวลา 1 วินาที (1000 ms) นับจากเวลานี้
+            _invulnerableUntil = DateTime.Now.AddSeconds(1);
         }
     }
 }
