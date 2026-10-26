@@ -461,6 +461,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             {
                 this.Controls.Remove(failedPanel);
 
+                // 📍 1. รีเซ็ตตัวแปรด่าน คะแนน และสถานะไอเท็ม
                 _level = 1;
                 _subLevel = 1;
                 _score = 0;
@@ -468,9 +469,30 @@ namespace Sec2_Group1_HappyJumpingFrog
                 _heartCollectedInLevel = false;
                 _timeCollectedInLevel = false;
 
+                // 📍 2. รีเซ็ตชีวิตกบกลับเป็น 3 และย้ายกบกลับจุดเริ่มต้น
+                if (_frog != null)
+                {
+                    _frog.Lives = 3;
+                    _frog.X = StartX;
+                    _frog.Y = StartY;
+                }
+
+                // 📍 3. รีเซ็ตเวลานับถอยหลังด่าน 1 ใหม่ (1500 วินาที)
+                _gameTimer?.Reset(LevelSeconds[0]);
+
+                // 📍 4. อัปเดตฉาก ความยาก และสร้างดอกบัวใหม่
                 UpdateLevelBackground();
                 SetLevelDifficulty();
                 BuildLotuses();
+
+                // 📍 5. เริ่มเวลาเกมใหม่ และดึง Focus คีย์บอร์ดกลับมา
+                _lastHopTime = DateTime.MinValue;
+                _lastElapsed = _stopwatch.Elapsed.TotalSeconds;
+                timerGame.Start();
+
+                this.Activate();
+                this.Focus();
+                Invalidate();
             };
 
             failedPanel.EndGameClicked += (s, ev) => {
@@ -739,7 +761,7 @@ namespace Sec2_Group1_HappyJumpingFrog
         }
 
         private void FormGame_Load(object sender, EventArgs e)
-        {
+        { 
         }
     }
 }
