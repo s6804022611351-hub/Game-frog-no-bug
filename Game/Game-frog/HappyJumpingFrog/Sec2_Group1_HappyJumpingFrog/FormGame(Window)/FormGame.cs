@@ -193,10 +193,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             _road.Draw(g);
             _heartItem?.Draw(g);
             _frog.Draw(g);
-            DrawSidePanel(g);
-
-            if (_paused)
-                DrawCenteredText(g, "PAUSED", _titleFont, _fieldWidth / 2f, WorldHeight / 2f - 15);
+            DrawSidePanel(g);        
         }
 
         private void DrawSidePanel(Graphics g)
@@ -268,12 +265,19 @@ namespace Sec2_Group1_HappyJumpingFrog
         protected override void OnMouseClick(MouseEventArgs e)
         {
             base.OnMouseClick(e);
-            PointF p = new PointF(e.X / _scale, e.Y / _scale);
+
+            // คำนวณสเกลปัจจุบันเทียบกับขนาดหน้าจอจริง
+            float scaleX = ClientSize.Width / (float)(_fieldWidth + PanelWidth);
+            float scaleY = ClientSize.Height / (float)WorldHeight;
+
+            // แปลงพิกัดเมาส์บนจอ ให้ตรงกับพิกัดในเกม
+            PointF p = new PointF(e.X / scaleX, e.Y / scaleY);
 
             if (ButtonRect(0).Contains(p)) TogglePause();
             else if (ButtonRect(1).Contains(p)) _soundOn = !_soundOn;
             else if (ButtonRect(2).Contains(p)) _musicOn = !_musicOn;
 
+            this.Focus();
             Invalidate();
         }
 
@@ -309,22 +313,41 @@ namespace Sec2_Group1_HappyJumpingFrog
 
             // สร้างหน้า Pause และส่งสถานะเสียง/เพลงปัจจุบันเข้าไปด้วย
             UserControlPause pausePanel = new UserControlPause(_soundOn, _musicOn);
+            this.Controls.Add(pausePanel);
+            pausePanel.BringToFront();
 
-            // จัดตำแหน่งให้อยู่ตรงกลางพื้นที่เกม
-            pausePanel.Location = new Point(
-                (int)((_fieldWidth - pausePanel.Width) / 2f),
-                (int)((WorldHeight - pausePanel.Height) / 2f)
-            );
+            // 📌 ฟังก์ชันคำนวณตำแหน่งกึ่งกลางตามสเกลหน้าจอจริง
+            Action updateCenterPosition = () => {
+                float scaleX = (float)ClientSize.Width / (_fieldWidth + PanelWidth);
+                float scaleY = (float)ClientSize.Height / WorldHeight;
+
+                // คำนวณความกว้างของพื้นที่เกมฝั่งซ้ายในหน่วยพิกเซลจริงบนจอ
+                int gameAreaPixelWidth = (int)(_fieldWidth * scaleX);
+
+                // จัดให้อยู่ตรงกลางของพื้นที่เกมฝั่งซ้าย และกึ่งกลางแนวตั้งของจอ
+                int centerX = (gameAreaPixelWidth - pausePanel.Width) / 2;
+                int centerY = (ClientSize.Height - pausePanel.Height) / 2;
+
+                pausePanel.Location = new Point(Math.Max(0, centerX), Math.Max(0, centerY));
+            };
+
+            // จัดตำแหน่งครั้งแรกตอนเปิด
+            updateCenterPosition();
+
+            // ดักจับอีเวนต์ Resize เพื่อให้หน้าต่างอยู่ตรงกลางเสมอเวลาขยาย/ย่อจอ
+            EventHandler resizeHandler = (s, e) => updateCenterPosition();
+            this.Resize += resizeHandler;
 
             // ปุ่ม Continue (เล่นต่อ)
             pausePanel.ContinueClicked += (s, ev) => {
+                this.Resize -= resizeHandler;
                 this.Controls.Remove(pausePanel);
                 _paused = false;
 
-                // 📌 เพิ่มคำสั่งคืนค่า Focus ให้ Form หลัก เพื่อให้กดปุ่มเดินต่อได้ทันที
+                // คืนค่า Focus ให้ Form หลัก เพื่อให้กบเดินต่อได้ทันที
                 this.Activate();
                 this.Focus();
-                _lastHopTime = DateTime.MinValue; // รีเซ็ตเวลาหน่วงการกระโดดเผื่อค้าง
+                _lastHopTime = DateTime.MinValue;
 
                 timerGame.Start();
                 _lastElapsed = _stopwatch.Elapsed.TotalSeconds;
@@ -332,12 +355,10 @@ namespace Sec2_Group1_HappyJumpingFrog
 
             // ปุ่ม Menu (กลับหน้าหลัก)
             pausePanel.MenuClicked += (s, ev) => {
+                this.Resize -= resizeHandler;
                 this.Hide();
-
                 FormMenu menuForm = new FormMenu();
                 menuForm.ShowDialog(this);
-
-                // 3. ปิดหน้าจอ Game Over นี้ลง
                 this.Close();
             };
 
@@ -471,10 +492,34 @@ namespace Sec2_Group1_HappyJumpingFrog
 
             // 1. สร้างหน้า Level Failed ขึ้นมาใหม่ผ่านโค้ด
             UserControlLevelFailed failedPanel = new UserControlLevelFailed(_score);
+            this.Controls.Add(failedPanel);
+            failedPanel.BringToFront();
 
-            // 2. จัดตำแหน่งให้อยู่ตรงกลางพื้นที่เกมพอดี
-            failedPanel.TryAgainClicked += (s, ev) => 
-            {
+            // 📌 2. ฟังก์ชันคำนวณตำแหน่งกึ่งกลางตามสเกลหน้าจอจริง (เหมือนหน้า Pause)
+            Action updateCenterPosition = () => {
+                float scaleX = (float)ClientSize.Width / (_fieldWidth + PanelWidth);
+                float scaleY = (float)ClientSize.Height / WorldHeight;
+
+                // คำนวณความกว้างของพื้นที่เกมฝั่งซ้ายในหน่วยพิกเซลจริงบนจอ
+                int gameAreaPixelWidth = (int)(_fieldWidth * scaleX);
+
+                // จัดให้อยู่ตรงกลางของพื้นที่เกมฝั่งซ้าย และกึ่งกลางแนวตั้งของจอ
+                int centerX = (gameAreaPixelWidth - failedPanel.Width) / 2;
+                int centerY = (ClientSize.Height - failedPanel.Height) / 2;
+
+                failedPanel.Location = new Point(Math.Max(0, centerX), Math.Max(0, centerY));
+            };
+
+            // จัดตำแหน่งครั้งแรกตอนเปิด
+            updateCenterPosition();
+
+            // ดักจับอีเวนต์ Resize เพื่อให้หน้าต่างอยู่ตรงกลางเสมอเวลาขยาย/ย่อจอ
+            EventHandler resizeHandler = (s, e) => updateCenterPosition();
+            this.Resize += resizeHandler;
+
+            // 3. ปุ่ม Try Again (เล่นใหม่อีกครั้ง)
+            failedPanel.TryAgainClicked += (s, ev) => {
+                this.Resize -= resizeHandler;
                 this.Controls.Remove(failedPanel);
 
                 // รีเซ็ตค่าเกมใหม่
@@ -485,17 +530,15 @@ namespace Sec2_Group1_HappyJumpingFrog
 
                 BuildLotuses();
 
-                // แทนที่จะ new PlayerFrog ใหม่ ให้รีเซ็ตตำแหน่งและคืนค่าชีวิต/สถานะแทน
                 _frog.X = StartX;
                 _frog.Y = StartY;
-                _frog.Lives = 3; // หรือจำนวนชีวิตเริ่มต้นของคุณ
-                                 // _frog.Reset(); // ถ้าในคลาส PlayerFrog มีเมธอด Reset สามารถเรียกใช้ตรงนี้ได้ครับ
+                _frog.Lives = 3;
 
                 _gameTimer.Reset(LevelSeconds[0]);
                 _lastElapsed = _stopwatch.Elapsed.TotalSeconds;
-                _lastHopTime = DateTime.MinValue; // รีเซ็ตเวลาหน่วงการกระโดด
+                _lastHopTime = DateTime.MinValue;
 
-                // คืนค่า Focus ให้ Form หลัก เพื่อให้กดปุ่มลูกศรหรือ WASD เดินได้ทันที
+                // คืนค่า Focus ให้ Form หลัก เพื่อให้กบเดินต่อได้ทันที
                 this.Activate();
                 this.Focus();
 
