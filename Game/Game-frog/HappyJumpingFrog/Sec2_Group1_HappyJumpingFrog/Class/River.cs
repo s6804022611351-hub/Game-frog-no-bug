@@ -4,57 +4,62 @@ using System.Drawing;
 
 namespace Sec2_Group1_HappyJumpingFrog.Class
 {
-    internal class River
+    public class River
     {
-        // กึ่งกลางแนวตั้งของแต่ละเลนแม่น้ำ (ต้องตรงกับ RowCenters ใน PlayerFrog)
-        private const float Lane1Center = 130;   // เลนบนสุด
-        private const float Lane2Center = 200;   // เลนกลาง
-        private const float Lane3Center = 270;   // เลนล่างสุด (ใกล้ถนน)
+        public List<FriendMonster> Friends { get; private set; }
 
-        public List<FriendMonster> Friends { get; private set; } = new List<FriendMonster>();
-
-        // แปลงจุดกึ่งกลางเลนเป็นพิกัดขอบบนของปลา
-        private static float TopOf(float laneCenter)
+        public River(int areaWidth, int fishCountPerRow = 3, int level = 1)
         {
-            return laneCenter - FriendMonster.FishHeight / 2f;
-        }
+            Friends = new List<FriendMonster>();
+            Random rnd = new Random();
 
-        public River(int formWidth)
-        {
-            Image fish1 = Properties.Resources.Fish1;
-            Image fish2 = Properties.Resources.Fish2;
+            int laneCount = (level == 3) ? 4 : 3;
 
-            // เลนบนสุด: Fish1 วิ่งไปทางขวา
-            Friends.Add(new FriendMonster(fish1, 50, TopOf(Lane1Center), 2f, formWidth));
-            Friends.Add(new FriendMonster(fish1, 350, TopOf(Lane1Center), 2f, formWidth));
-            Friends.Add(new FriendMonster(fish1, 650, TopOf(Lane1Center), 2f, formWidth));
+            // 📍 ปรับพิกัด Y ใหม่ให้ตรงกับก้าวโดด 4 ก้าวในแม่น้ำด่าน 3:
+            // เลน 3 (ล่างสุด): 317f -> ตรงตำแหน่งกบในรูปพอดีเป๊ะ! (ข้ามถนนมาเจอปลาทันที)
+            // เลน 2: 255f
+            // เลน 1: 193f
+            // เลน 0 (บนสุด): 131f
+            float[] laneY = (level == 3)
+                ? new float[] { 131f, 193f, 255f, 317f }
+                : new float[] { 120f, 190f, 260f };
 
-            // เลนกลาง: Fish2 วิ่งไปทางซ้าย
-            Friends.Add(new FriendMonster(fish2, 200, TopOf(Lane2Center), -3f, formWidth));
-            Friends.Add(new FriendMonster(fish2, 550, TopOf(Lane2Center), -3f, formWidth));
+            for (int lane = 0; lane < laneCount; lane++)
+            {
+                float y = laneY[lane];
+                float direction = (lane % 2 == 0) ? 1 : -1;
+                Image sprite;
 
-            // เลนล่างสุด: Fish1 วิ่งไปทางขวา
-            Friends.Add(new FriendMonster(fish1, 180, TopOf(Lane3Center), 2.5f, formWidth));
-            Friends.Add(new FriendMonster(fish1, 500, TopOf(Lane3Center), 2.5f, formWidth));
-            Friends.Add(new FriendMonster(fish1, 750, TopOf(Lane3Center), 2.5f, formWidth));
-        }
+                if (level == 3)
+                {
+                    sprite = (lane % 2 == 0) ? Properties.Resources.Fish1 : Properties.Resources.Fish2;
+                }
+                else
+                {
+                    sprite = (lane == 1) ? Properties.Resources.Fish2 : Properties.Resources.Fish1;
+                }
 
-        public void Draw(Graphics g)
-        {
-            foreach (var friend in Friends)
-                friend.Draw(g);
+                float speed = (2.2f + lane * 0.3f + (level - 1) * 0.5f) * direction;
+                float spacing = areaWidth / (float)fishCountPerRow;
+
+                for (int i = 0; i < fishCountPerRow; i++)
+                {
+                    float x = i * spacing + rnd.Next(0, 30);
+                    Friends.Add(new FriendMonster(sprite, x, y, speed, areaWidth));
+                }
+            }
         }
 
         public void UpdateFriends()
         {
-            foreach (var friend in Friends)
-                friend.Update();
+            foreach (var fish in Friends)
+                fish.Update();
         }
 
-        public void SetAreaWidth(int width)
+        public void Draw(Graphics g)
         {
-            foreach (var friend in Friends)
-                friend.AreaWidth = width;
+            foreach (var fish in Friends)
+                fish.Draw(g);
         }
     }
 }

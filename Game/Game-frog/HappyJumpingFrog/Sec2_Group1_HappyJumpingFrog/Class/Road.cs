@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HappyJumpingFrog;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 
@@ -10,7 +11,6 @@ namespace Sec2_Group1_HappyJumpingFrog.Class
 
         public List<EnemyMonster> Enemies { get; private set; }
 
-        // 📍 เพิ่มพารามิเตอร์ gradualBottomLane (กำหนดค่าเริ่มต้นเป็น false)
         public Road(float topY, float laneHeight, int laneCount,
                     Image[] sprites, float baseSpeed, int areaWidth,
                     bool gradualBottomLane = false)
@@ -26,7 +26,6 @@ namespace Sec2_Group1_HappyJumpingFrog.Class
 
                 Image sprite = (lane < sprites.Length) ? sprites[lane] : sprites[sprites.Length - 1];
 
-                // 📍 เช็กว่าเลนนี้คือเลนล่างสุด (lane == laneCount - 1) และถูกเปิดใช้งาน gradualBottomLane หรือไม่
                 bool isBottomLaneGradual = gradualBottomLane && (lane == laneCount - 1);
 
                 for (int i = 0; i < 3; i++)
@@ -35,7 +34,6 @@ namespace Sec2_Group1_HappyJumpingFrog.Class
 
                     if (isBottomLaneGradual)
                     {
-                        // 📍 เฉพาะเลนล่างสุดติดกบ: ให้วางนอกจอ ค่อยๆ ทยอยวิ่งเข้าทีละตัว
                         if (direction > 0)
                             x = -200f - (i * 280f) - rnd.Next(0, 50);
                         else
@@ -43,7 +41,6 @@ namespace Sec2_Group1_HappyJumpingFrog.Class
                     }
                     else
                     {
-                        // 📍 เลนอื่นๆ ทั้งหมด: วางสุ่มกระจายบนถนนทันที ฉากจะไม่ดูโล่ง
                         x = i * 250 + rnd.Next(0, 100);
                     }
 
@@ -69,5 +66,25 @@ namespace Sec2_Group1_HappyJumpingFrog.Class
             foreach (EnemyMonster enemy in Enemies)
                 enemy.AreaWidth = width;
         }
+
+        // 📍 เพิ่มเมธอดตรวจจับการชนระหว่างกบกับศัตรูบนถนน
+        public bool CheckCollision(PlayerFrog frog)
+        {
+            if (frog == null || Enemies == null) return false;
+
+            RectangleF frogBounds = new RectangleF(frog.X, frog.Y, frog.Width, frog.Height);
+
+            foreach (EnemyMonster enemy in Enemies)
+            {
+                RectangleF enemyBounds = new RectangleF(enemy.X, enemy.Y, enemy.Width, enemy.Height);
+                if (frogBounds.IntersectsWith(enemyBounds))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
     }
+
 }

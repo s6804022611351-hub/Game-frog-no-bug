@@ -15,7 +15,7 @@ namespace Sec2_Group1_HappyJumpingFrog
         // ==========================================
         // 1. ประกาศตัวแปรระดับคลาส
         // ==========================================
-        private List<TargetLotus> _lotuses = new List<TargetLotus>(); // ลิสต์เก็บดอกบัวของด่านย่อยปัจจุบัน
+        private List<TargetLotus> _lotuses = new List<TargetLotus>(); // ลิสต์เก็บดอกบัว
         private River river;                    // ตัวแปรสำหรับจัดการแม่น้ำและปลา
         private PlayerFrog _frog;               // ตัวละครกบของผู้เล่น
         private Road _road;                     // วัตถุจัดการถนนและศัตรูบนถนน
@@ -26,7 +26,7 @@ namespace Sec2_Group1_HappyJumpingFrog
         private const float HeartWidth = 70f;   // ความกว้างไอเท็มหัวใจ
         private const float HeartHeight = 40f;  // ความสูงไอเท็มหัวใจ
 
-        // ค่าคงที่ขนาดหน้าจอและพื้นที่เล่นเกม
+        // ค่าคงที่ขนาดสนามเล่นแบบ Virtual Grid (910 x 650)
         private const int WorldHeight = 650;    // ความสูงพื้นที่เกม
         private const int PanelWidth = 160;     // ความกว้างแผงเมนูด้านขวา
         private const int ButtonSize = 64;      // ขนาดปุ่มกดบนแผงขวา
@@ -35,8 +35,6 @@ namespace Sec2_Group1_HappyJumpingFrog
         // ค่าคงที่ของถนนและแม่น้ำ
         private const float RoadTop = 358;      // ขอบบนถนน
         private const float LaneHeight = 62;    // ความสูงต่อเลน
-        private const int RiverFirstRow = 5;    // แถวแม่น้ำแถวแรก
-        private const int RiverLastRow = 7;     // แถวแม่น้ำแถวสุดท้าย
 
         // จุดเริ่มต้นของกบ
         private const float StartX = 350;
@@ -45,7 +43,7 @@ namespace Sec2_Group1_HappyJumpingFrog
         // ขนาดและตำแหน่งแนวตั้งของดอกบัว
         private const float LotusWidth = 110f;
         private const float LotusHeight = 70f;
-        private const float LotusCenterY = 50f;   // ตรงกับกึ่งกลางแถวบนสุดที่กบกระโดดไปถึง
+        private const float LotusCenterY = 69f;
         private const int SubLevelCount = 5;      // จำนวนด่านย่อยต่อด่านหลัก
 
         // ค่าคงที่ความเร็วศัตรูประจำแต่ละด่าน
@@ -53,25 +51,26 @@ namespace Sec2_Group1_HappyJumpingFrog
         private const float EnemySpeedLevel2 = 3.2f;
         private const float EnemySpeedLevel3 = 4.0f;
 
-        // เวลาของด่านหลักแต่ละด่าน (วินาที): ด่าน 1 = 1500, ด่าน 2 = 1200, ด่าน 3 = 900
+        // เวลาของด่านหลักแต่ละด่าน (วินาที)
         private static readonly int[] LevelSeconds = { 1500, 1200, 900 };
 
-        // นาฬิกาจับเวลาถอยหลัง + ตัววัดเวลาจริงระหว่างเฟรม
+        // นาฬิกาจับเวลาถอยหลัง
         private GameTimer _gameTimer;
         private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
         private double _lastElapsed = 0;
 
         // สถานะเกมและคะแนน
-        private int _level = 1;                 // ด่านหลักปัจจุบัน (สูงสุด 3)
+        private int _level = 1;                 // ด่านหลักปัจจุบัน (1-3)
         private int _subLevel = 1;              // ด่านย่อยปัจจุบัน (1-5)
         private int _score = 0;                 // คะแนน
-        private int _goal = 0;                  // จำนวนดอกบัวที่เก็บได้ในด่านย่อยนี้
-        private int _goalTarget = 5;            // จำนวนดอกบัวที่ต้องเก็บ (5,4,3,2,1)
+        private int _goal = 0;                  // จำนวนดอกบัวที่เก็บได้
+        private int _goalTarget = 5;            // จำนวนดอกบัวเป้าหมาย
         private bool _paused = false;           // สถานะหยุดเกม
         private bool _soundOn = true;           // สถานะปุ่ม SFX
         private bool _musicOn = true;           // สถานะปุ่ม BGM
+        private bool _heartCollectedInLevel = false;
 
-        // หน่วงเวลาการเดิน/กระโดด (100 ms = 0.1 วินาที)
+        // หน่วงเวลาการเดิน/กระโดด (100 ms)
         private DateTime _lastHopTime = DateTime.MinValue;
         private const double HopCooldownMs = 100;
 
@@ -86,39 +85,38 @@ namespace Sec2_Group1_HappyJumpingFrog
         public FormGame()
         {
             InitializeComponent();
-            this.WindowState = FormWindowState.Maximized;   
-            DoubleBuffered = true;               // ลดการกะพริบของหน้าจอ
-            ResizeRedraw = true;                 // วาดใหม่เมื่อปรับขนาดหน้าต่าง
-            KeyPreview = true;                   // ดักจับคีย์บอร์ดที่ Form ก่อน
-            ClientSize = new Size(_fieldWidth + PanelWidth, WorldHeight);
-            UpdateLayout();
 
-            // โหลดรูปภาพและสร้างวัตถุเกม
+            // ตั้งค่าระบบวาดเพื่อความลื่นไหล
+            DoubleBuffered = true;
+            ResizeRedraw = true;
+            KeyPreview = true;
+
+            // 📍 ตั้งค่าเต็มจอ
+            this.WindowState = FormWindowState.Maximized;
+
+            // โหลดรูปภาพและสร้างวัตถุเกม (ใช้ background สำหรับด่าน 1)
             _background = Properties.Resources.background;
             _lotusImage = Properties.Resources.lotus;
             _frog = new PlayerFrog(Properties.Resources.frog, StartX, StartY);
 
-            // ปรับความยากและสร้างถนนตามระดับด่านที่ 1
+            // ปรับความยากตามด่านแรก
             SetLevelDifficulty();
 
-            river = new River(_fieldWidth);
-
-            // สร้างไอเท็มหัวใจและสุ่มตำแหน่งบนแมพ
+            // สร้างไอเท็มหัวใจ
             _heartItem = new Items(Properties.Resources.heart, 0, 0, HeartWidth, HeartHeight);
             _heartItem.SpawnRandom(_fieldWidth, WorldHeight);
 
-            // สร้างนาฬิกาของด่านปัจจุบัน
+            // สร้างนาฬิกา
             _gameTimer = new GameTimer(LevelSeconds[_level - 1]);
 
-            // สร้างดอกบัวของด่านย่อยแรก (5 ใบ)
+            // สร้างดอกบัว
             BuildLotuses();
 
-            timerGame.Interval = 16; // ประมาณ 60 FPS
+            timerGame.Interval = 16;
             _lastElapsed = _stopwatch.Elapsed.TotalSeconds;
             timerGame.Start();
         }
 
-        // สร้างดอกบัวใหม่ตามด่านย่อย: ด่านย่อย 1..5 -> 5,4,3,2,1 ใบ
         private void BuildLotuses()
         {
             _lotuses.Clear();
@@ -131,7 +129,6 @@ namespace Sec2_Group1_HappyJumpingFrog
             PositionLotuses();
         }
 
-        // จัดตำแหน่งดอกบัวให้อยู่กลางสนามเสมอ
         private void PositionLotuses()
         {
             int n = _lotuses.Count;
@@ -143,34 +140,17 @@ namespace Sec2_Group1_HappyJumpingFrog
             }
         }
 
-        private void UpdateLayout()
-        {
-            if (ClientSize.Height <= 0 || ClientSize.Width <= 0) return;
-
-            // จัดตำแหน่งดอกบัวอิงตาม FieldWidth คงที่ (750)
-            PositionLotuses();
-        }
-
         private void UpdateLevelBackground()
         {
-            if (_level == 2)
-            {
-                _background = Properties.Resources.background2; // ด่าน 2
-            }
-            else if (_level == 3)
-            {
-                _background = Properties.Resources.background3; // ด่าน 3
-            }
-            else
-            {
-                _background = Properties.Resources.background;  // ด่าน 1
-            }
+            if (_level == 2) _background = Properties.Resources.background2;
+            else if (_level == 3) _background = Properties.Resources.background4;
+            else _background = Properties.Resources.background; // 📍 ใช้ background สำหรับด่าน 1
         }
 
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
-            UpdateLayout();
+            PositionLotuses();
             Invalidate();
         }
 
@@ -183,6 +163,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             Graphics g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
+            // 📍 คำนวณ Scale ปรับขนาดสนามเสมือน (910x650) ให้เต็มจออย่างสมบูรณ์
             float scaleX = ClientSize.Width / (float)(_fieldWidth + PanelWidth);
             float scaleY = ClientSize.Height / (float)WorldHeight;
             g.ScaleTransform(scaleX, scaleY);
@@ -197,11 +178,13 @@ namespace Sec2_Group1_HappyJumpingFrog
 
             if (river != null) river.Draw(g);
             _road?.Draw(g);
-            _heartItem?.Draw(g);
+
+            // 📍 แสดงหัวใจเฉพาะเมื่อยังไม่ได้เก็บในด่านหลักนี้
+            if (_heartItem != null && !_heartCollectedInLevel)
+                _heartItem.Draw(g);
+
             _frog?.Draw(g);
             DrawSidePanel(g);
-
-            
         }
 
         private void DrawSidePanel(Graphics g)
@@ -313,10 +296,9 @@ namespace Sec2_Group1_HappyJumpingFrog
 
             UserControlPause pausePanel = new UserControlPause(_soundOn, _musicOn);
 
-            // 📍 คำนวณให้อยู่กึ่งกลางหน้าจอจริงของ FormGame (รองรับโหมดเต็มจอ Maximized)
             pausePanel.Location = new Point(
-                (this.ClientSize.Width - pausePanel.Width) / 2,
-                (this.ClientSize.Height - pausePanel.Height) / 2
+                Math.Max(0, (this.ClientSize.Width - pausePanel.Width) / 2),
+                Math.Max(0, (this.ClientSize.Height - pausePanel.Height) / 2)
             );
 
             pausePanel.ContinueClicked += (s, ev) => {
@@ -332,10 +314,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             };
 
             pausePanel.MenuClicked += (s, ev) => {
-                this.Hide();
-                FormMenu menuForm = new FormMenu();
-                menuForm.ShowDialog(this);
-                this.Close();
+                ReturnToMenu();
             };
 
             pausePanel.SoundToggleClicked += (s, ev) => {
@@ -352,108 +331,93 @@ namespace Sec2_Group1_HappyJumpingFrog
             pausePanel.BringToFront();
         }
 
-        private FriendMonster FindFishUnderFrog()
-        {
-            if (river == null) return null;
-
-            float fx = _frog.X + _frog.Width / 2f;
-            float fy = _frog.Y + _frog.Height / 2f;
-
-            foreach (FriendMonster fish in river.Friends)
-            {
-                float cy = fish.Y + fish.Height / 2f;
-                if (Math.Abs(cy - fy) < 20 && fx >= fish.X && fx <= fish.X + fish.Width)
-                    return fish;
-            }
-            return null;
-        }
-
         // ==========================================
-        // 4. Game Loop (timerGame_Tick)
+        // 4. Game Loop (timerGame_Tick) - แก้ไขเรียบร้อย
         // ==========================================
         private void timerGame_Tick(object sender, EventArgs e)
         {
-            if (river != null) river.UpdateFriends();
-            _frog.Update();
-            _road.Update();
+            if (_paused) return;
 
-            // 1. ตรวจจับชนศัตรู
-            foreach (EnemyMonster enemy in _road.Enemies)
+            // 📍 1. คำนวณเวลา delta time และอัปเดตเวลานับถอยหลัง (ทำให้เวลาเดินตลอดเวลา)
+            double now = _stopwatch.Elapsed.TotalSeconds;
+            float dt = (float)(now - _lastElapsed);
+            _lastElapsed = now;
+            _gameTimer?.Update(dt);
+
+            river?.UpdateFriends();
+            _road?.Update();
+
+            // 2. ตรวจจับการชนศัตรูบนถนน
+            if (!_frog.IsInvulnerable && _road != null && _road.CheckCollision(_frog))
             {
-                if (_frog.Intersects(enemy))
-                {
-                    _frog.Die();
-
-                    // 📍 วาร์ปกบกลับจุดเริ่มต้นทันทีที่โดนชน เพื่อไม่ให้โดนคำสั่ง Die() ซ้ำในเฟรมถัดไป
-                    _frog.X = StartX;
-                    _frog.Y = StartY;
-                    break;
-                }
-            }
-
-            // 2. ตรวจจับตกน้ำ / ขี่ปลา
-            int row = _frog.CurrentRow;
-            if (row >= RiverFirstRow && row <= RiverLastRow)
-            {
-                FriendMonster fish = FindFishUnderFrog();
-                if (fish != null)
-                    _frog.X += fish.SwimSpeed;
-                else
-                    _frog.Die();
-            }
-
-            if (_frog.X < -_frog.Width / 2f || _frog.X > _fieldWidth - _frog.Width / 2f)
                 _frog.Die();
-
-            // 3. ตรวจจับกบเก็บไอเท็มหัวใจ
-            if (_heartItem != null && _heartItem.IsActive && _frog.Intersects(_heartItem))
-            {
-                _heartItem.IsActive = false;
-                _frog.Lives++;   // เพิ่มจำนวนชีวิต +1
+                _frog.X = StartX;
+                _frog.Y = StartY;
+                return;
             }
 
-            // 4. ตรวจจับกบกระโดดไปลงดอกบัว
-            foreach (var lotus in _lotuses)
+            // 3. ตรวจจับการเก็บดอกบัว
+            RectangleF frogBounds = new RectangleF(_frog.X, _frog.Y, _frog.Width, _frog.Height);
+            for (int i = 0; i < _lotuses.Count; i++)
             {
-                if (!_frog.Intersects(lotus)) continue;
-
+                TargetLotus lotus = _lotuses[i];
                 if (!lotus.IsCollected)
                 {
-                    // ยังไม่เคยเก็บ -> ได้คะแนน และวาร์ปกบกลับจุดเริ่มต้น
-                    lotus.IsCollected = true;
-                    _goal++;
-                    _score += 1;
-
-                    _frog.X = StartX;
-                    _frog.Y = StartY;
-
-                    // เก็บครบตามจำนวนของด่านย่อยนี้แล้ว
-                    if (_goal >= _goalTarget)
+                    RectangleF lotusBounds = new RectangleF(lotus.X, lotus.Y, lotus.Width, lotus.Height);
+                    if (frogBounds.IntersectsWith(lotusBounds))
                     {
-                        HandleSubLevelClear();
+                        CollectLotusByIndex(i);
                         return;
                     }
                 }
-                else
-                {
-                    // เคยเก็บไปแล้ว แต่กบกระโดดมาลงจุดเดิม -> ตาย
-                    _frog.Die();
-                }
-                break;
             }
 
-            // 5. นับเวลาถอยหลังตามเวลาจริงที่ผ่านไป
-            double now = _stopwatch.Elapsed.TotalSeconds;
-            _gameTimer.Tick(now - _lastElapsed);
-            _lastElapsed = now;
+            // 4. ตรวจจับพื้นที่แม่น้ำ (ขี่ปลา / ตกน้ำ)
+            float frogCenterY = _frog.Y + _frog.Height / 2f;
+            float riverMinY = (_level == 3) ? 110f : 100f;
+            float riverMaxY = (_level == 3) ? 360f : 290f;
+            if (!_frog.IsInvulnerable && frogCenterY >= riverMinY && frogCenterY <= riverMaxY)
+            {
+                FriendMonster fish = FindFishUnderFrog();
+                if (fish != null)
+                {
+                    // ✅ ขี่ปลา -> เกาะลอยตามปลา
+                    _frog.X += fish.SwimSpeed;
 
-            // 6. เช็ก Game Over (หัวใจหมด หรือ เวลาหมด)
-            if (_frog.IsGameOver || _gameTimer.IsTimeUp)
+                    if (_frog.X < 0) _frog.X = 0;
+                    if (_frog.X + _frog.Width > _fieldWidth) _frog.X = _fieldWidth - _frog.Width;
+                }
+                else
+                {
+                    // ❌ ตกลงผิวน้ำ (ไม่มีปลาใต้เท้า) -> ตายทันที!
+                    _frog.Die();
+                    _frog.X = StartX;
+                    _frog.Y = StartY;
+                    return; // 📍 ใช้ return; ตรงนี้ได้เพราะอยู่ใน timerGame_Tick (void)
+                }
+            }
+
+            // 📍 5. ตรวจจับการเก็บไอเท็มหัวใจ (เก็บได้แค่ 1 ครั้งต่อด่านหลักเท่านั้น)
+            if (!_heartCollectedInLevel && _heartItem != null)
+            {
+                RectangleF frogBoundsForHeart = new RectangleF(_frog.X, _frog.Y, _frog.Width, _frog.Height);
+                RectangleF heartBounds = new RectangleF(_heartItem.X, _heartItem.Y, _heartItem.Width, _heartItem.Height);
+
+                if (frogBoundsForHeart.IntersectsWith(heartBounds))
+                {
+                    _frog.Lives++;
+                    _heartCollectedInLevel = true; // 📍 ล็อกไว้ว่าเก็บหัวใจในด่านนี้แล้ว
+                }
+            }
+
+            // 6. ตรวจจับจบเกม (พลังชีวิตหมด หรือ หมดเวลา)
+            if (_frog.Lives <= 0 || _gameTimer.IsTimeUp)
             {
                 timerGame.Stop();
                 ShowLevelFailedOverlay();
                 return;
             }
+
             Invalidate();
         }
 
@@ -466,6 +430,11 @@ namespace Sec2_Group1_HappyJumpingFrog
 
             UserControlLevelFailed failedPanel = new UserControlLevelFailed(_score);
 
+            failedPanel.Location = new Point(
+                Math.Max(0, (this.ClientSize.Width - failedPanel.Width) / 2),
+                Math.Max(0, (this.ClientSize.Height - failedPanel.Height) / 2)
+            );
+
             failedPanel.TryAgainClicked += (s, ev) =>
             {
                 this.Controls.Remove(failedPanel);
@@ -474,24 +443,12 @@ namespace Sec2_Group1_HappyJumpingFrog
                 _subLevel = 1;
                 _score = 0;
                 _paused = false;
+                _heartCollectedInLevel = false; // 📍 รีเซ็ตหัวใจเมื่อเริ่มเล่นใหม่
 
                 UpdateLevelBackground();
                 SetLevelDifficulty();
                 BuildLotuses();
-
-                _frog.X = StartX;
-                _frog.Y = StartY;
-                _frog.Lives = 3;
-
-                _gameTimer.Reset(LevelSeconds[0]);
-                _lastElapsed = _stopwatch.Elapsed.TotalSeconds;
-                _lastHopTime = DateTime.MinValue;
-
-                this.Activate();
-                this.Focus();
-
-                timerGame.Start();
-                Invalidate();
+                // ...
             };
 
             failedPanel.EndGameClicked += (s, ev) => {
@@ -506,7 +463,7 @@ namespace Sec2_Group1_HappyJumpingFrog
         }
 
         // ==========================================
-        // 5. ระบบเก็บดอกบัวทางลัด (Z, X, C, V, B)
+        // 5. ปุ่มทางลัด (Z, X, C, V, B)
         // ==========================================
         private void CollectLotusByIndex(int index)
         {
@@ -534,10 +491,8 @@ namespace Sec2_Group1_HappyJumpingFrog
         }
 
         // ==========================================
-        // 6. ระบบจัดการด่านย่อยและด่านหลัก
+        // 6. จัดการด่าน
         // ==========================================
-
-
         private void HandleSubLevelClear()
         {
             if (_subLevel < SubLevelCount)
@@ -589,7 +544,6 @@ namespace Sec2_Group1_HappyJumpingFrog
             }
         }
 
-        // 📍 ฟังก์ชันสำหรับสลับกลับไปยังหน้า FormMenu (วางเพียงจุดเดียวในไฟล์)
         private void ReturnToMenu()
         {
             this.Hide();
@@ -604,46 +558,38 @@ namespace Sec2_Group1_HappyJumpingFrog
             _subLevel = 1;
             _paused = false;
 
+            _heartCollectedInLevel = false; // 📍 รีเซ็ตสิทธิ์เก็บหัวใจเมื่อขึ้น Level ใหม่
+
             UpdateLevelBackground();
             SetLevelDifficulty();
             BuildLotuses();
 
-            if (_heartItem != null)
-            {
-                _heartItem.SpawnRandom(_fieldWidth, WorldHeight);
-            }
-
             _frog.X = StartX;
             _frog.Y = StartY;
 
-            // 📍 เพิ่มบรรทัดนี้: สั่งให้ Timer เริ่มทำงานใหม่ เพื่อให้ศัตรูและวัตถุต่างๆ วิ่งต่อตามปกติ
             timerGame.Start();
         }
 
-
-
-
         private void SetLevelDifficulty()
         {
+            _heartCollectedInLevel = false; // 📍 รีเซ็ตให้เก็บหัวใจได้ในด่านหลักใหม่
+            _heartItem?.SpawnRandom(_fieldWidth, WorldHeight);
+
             if (_level == 1)
             {
-                // 📍 ด่าน 1: 3 เลน (ศัตรูเกิดบนถนนตามปกติ เลนล่างสุดอยู่สูงกว่ากบ)
-                _road = new Road(
-                    RoadTop,
-                    LaneHeight,
-                    3,
-                    new Image[] {
-                Properties.Resources.enemy1,
-                Properties.Resources.enemy2,
-                Properties.Resources.enemy1
-                    },
-                    EnemySpeedLevel1,
-                    _fieldWidth
-                );
+                this.BackgroundImage = Properties.Resources.background;
+                _road = new Road(RoadTop, LaneHeight, 3, new Image[] { Properties.Resources.enemy1, Properties.Resources.enemy2, Properties.Resources.enemy1 }, EnemySpeedLevel1, _fieldWidth);
+                river = new River(_fieldWidth, 3, 1);
             }
             else if (_level == 2)
             {
-                // 📍 ด่าน 2: 4 เลน (ใส่ true เพื่อให้แถวล่างสุดติดกบโผล่มาจากนอกจอทีละตัว)
+                this.BackgroundImage = Properties.Resources.background2;
+                _road = new Road(RoadTop, LaneHeight, 4, new Image[] { Properties.Resources.enemy2, Properties.Resources.enemy1, Properties.Resources.enemy2, Properties.Resources.enemy1 }, EnemySpeedLevel2, _fieldWidth, true);
+                river = new River(_fieldWidth, 3, 2);
+            }
+            else if (_level == 3)
+            {
+                this.BackgroundImage = Properties.Resources.background4;
                 _road = new Road(
                     RoadTop,
                     LaneHeight,
@@ -654,29 +600,51 @@ namespace Sec2_Group1_HappyJumpingFrog
                 Properties.Resources.enemy2,
                 Properties.Resources.enemy1
                     },
-                    EnemySpeedLevel2,
-                    _fieldWidth,
-                    true // 👈 ใส่ true ป้องกันกบโดนชนตายตอนเริ่มด่าน 2
-                );
-            }
-            else if (_level == 3)
-            {
-                // 📍 ด่าน 3: 4 เลน (ใส่ true เช่นกัน เพื่อป้องกันกบตายตอนเริ่มด่าน 3)
-                _road = new Road(
-                    RoadTop,
-                    LaneHeight,
-                    4,
-                    new Image[] {
-                Properties.Resources.enemy2,
-                Properties.Resources.enemy2,
-                Properties.Resources.enemy1,
-                Properties.Resources.enemy2
-                    },
                     EnemySpeedLevel3,
                     _fieldWidth,
-                    true // 👈 ใส่ true ป้องกันกบโดนชนตายตอนเริ่มด่าน 3
+                    true
                 );
+                river = new River(_fieldWidth, 4, 3);
             }
+        }
+
+        // 📍 ฟังก์ชันตรวจจับว่ากบเหยียบอยู่บนตัวปลาตัวไหน
+        private FriendMonster FindFishUnderFrog()
+        {
+            if (river == null || river.Friends == null) return null;
+
+            RectangleF frogBounds = new RectangleF(_frog.X, _frog.Y, _frog.Width, _frog.Height);
+            float frogCenterY = _frog.Y + _frog.Height / 2f;
+
+            FriendMonster bestFish = null;
+            float minDistanceY = float.MaxValue;
+
+            foreach (FriendMonster fish in river.Friends)
+            {
+                float fishCenterY = fish.Y + fish.Height / 2f;
+                float distanceY = Math.Abs(fishCenterY - frogCenterY);
+
+                if (distanceY <= 25f)
+                {
+                    RectangleF fishBounds = new RectangleF(
+                        fish.X - 15f,
+                        fish.Y - 5f,
+                        fish.Width + 30f,
+                        fish.Height + 10f
+                    );
+
+                    if (frogBounds.IntersectsWith(fishBounds))
+                    {
+                        if (distanceY < minDistanceY)
+                        {
+                            minDistanceY = distanceY;
+                            bestFish = fish;
+                        }
+                    }
+                }
+            }
+
+            return bestFish; // 📍 คืนค่าชนิด FriendMonster
         }
 
         // ==========================================

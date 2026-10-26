@@ -2,56 +2,42 @@
 
 namespace Sec2_Group1_HappyJumpingFrog.Class
 {
-    // นาฬิกาจับเวลาถอยหลังของแต่ละด่าน
     public class GameTimer
     {
-        public int TotalSeconds { get; private set; }        // เวลาทั้งหมดของด่าน
-        public double RemainingSeconds { get; private set; } // เวลาที่เหลือ
+        private float _remainingSeconds;
 
-        public bool IsTimeUp
+        public GameTimer(int seconds)
         {
-            get { return RemainingSeconds <= 0; }
+            _remainingSeconds = seconds;
         }
 
-        // เวลาที่ใช้ไปแล้ว (เอาไว้คิดคะแนนในเฟสหลัง)
-        public double ElapsedSeconds
+        // 📍 ฟังก์ชันอัปเดตเวลานับถอยหลังตาม Delta Time
+        public void Update(float dt)
         {
-            get { return TotalSeconds - RemainingSeconds; }
+            if (_remainingSeconds > 0)
+            {
+                _remainingSeconds -= dt;
+                if (_remainingSeconds < 0)
+                    _remainingSeconds = 0;
+            }
         }
 
-        // แสดงเป็น mm:ss เช่น 25:00
+        public void Reset(int seconds)
+        {
+            _remainingSeconds = seconds;
+        }
+
+        public bool IsTimeUp => _remainingSeconds <= 0;
+
         public string TimeText
         {
             get
             {
-                int s = (int)Math.Ceiling(RemainingSeconds);
-                return string.Format("{0:00}:{1:00}", s / 60, s % 60);
+                int totalSec = (int)Math.Ceiling(_remainingSeconds);
+                int mins = totalSec / 60;
+                int secs = totalSec % 60;
+                return $"{mins:D2}:{secs:D2}";
             }
-        }
-
-        public GameTimer(int totalSeconds)
-        {
-            Reset(totalSeconds);
-        }
-
-        // ตั้งเวลาใหม่ (ใช้ตอนเปลี่ยนด่าน)
-        public void Reset(int totalSeconds)
-        {
-            TotalSeconds = totalSeconds;
-            RemainingSeconds = totalSeconds;
-        }
-
-        // เริ่มนับใหม่ด้วยเวลาเดิมของด่าน
-        public void Restart()
-        {
-            RemainingSeconds = TotalSeconds;
-        }
-
-        // ลดเวลาลงตามที่ผ่านไปจริง (หน่วยวินาที)
-        public void Tick(double elapsedSeconds)
-        {
-            RemainingSeconds -= elapsedSeconds;
-            if (RemainingSeconds < 0) RemainingSeconds = 0;
         }
     }
 }

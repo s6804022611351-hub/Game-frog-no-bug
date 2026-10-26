@@ -6,15 +6,12 @@ namespace Sec2_Group1_HappyJumpingFrog.Class
 {
     public class FriendMonster : GameObject
     {
-        // ขนาดปลา (ปรับตรงนี้ถ้าอยากให้ใหญ่/เล็กกว่านี้ 
-        public const int FishWidth = 170;
-        public const int FishHeight = 68;
-
         public float SwimSpeed { get; set; }
-        public int AreaWidth { get; set; }     // ความกว้างสนาม (เปลี่ยนได้ตอนย่อ/ขยายหน้าต่าง)
+        public int AreaWidth { get; set; }
 
+        // 📍 เปลี่ยน 100f, 45f เป็น 100, 45 (ใช้ int)
         public FriendMonster(Image sprite, float x, float y, float speed, int areaWidth)
-            : base(sprite, x, y, FishWidth, FishHeight)
+            : base(sprite, x, y, 100, 45)
         {
             SwimSpeed = speed;
             AreaWidth = areaWidth;
