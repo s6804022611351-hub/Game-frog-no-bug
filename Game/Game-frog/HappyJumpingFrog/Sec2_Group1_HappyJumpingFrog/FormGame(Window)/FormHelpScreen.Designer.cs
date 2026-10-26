@@ -86,6 +86,7 @@
             btnBackformHelp.Size = new Size(642, 73);
             btnBackformHelp.TabIndex = 2;
             btnBackformHelp.Text = "Back";
+            btnBackformHelp.TextAlign = ContentAlignment.BottomCenter;
             btnBackformHelp.UseVisualStyleBackColor = false;
             btnBackformHelp.Click += btnBackformHelp_Click;
             // 
@@ -132,9 +133,9 @@
             label2.ForeColor = Color.Aquamarine;
             label2.Location = new Point(0, 0);
             label2.Name = "label2";
-            label2.Size = new Size(1373, 138);
+            label2.Size = new Size(1387, 138);
             label2.TabIndex = 4;
-            label2.Text = "Get your frog safly across the road by don't let's it hits anybody on the road and your frog must stays on \r\nlotus leaf to cross the river to the other side.";
+            label2.Text = "Get your frog safely across the road by don't let's it hits anybody on the road and your frog must stays on \r\nlotus leaf to cross the river to the other side.";
             label2.Click += label2_Click;
             // 
             // FormHelpScreen
