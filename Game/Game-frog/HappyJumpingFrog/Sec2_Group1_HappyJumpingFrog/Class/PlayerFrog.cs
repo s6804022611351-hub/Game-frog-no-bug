@@ -81,5 +81,16 @@ namespace HappyJumpingFrog
             // ตั้งเวลาให้อมตะเป็นเวลา 1 วินาที (1000 ms) นับจากเวลานี้
             _invulnerableUntil = DateTime.Now.AddSeconds(1);
         }
+        public void Draw(Graphics g)
+        {
+            // ถ้ากำลังอมตะ ให้กระพริบตามมิลลิวินาที (แสดงตัวกบแค่บางเฟรม)
+            if (IsInvulnerable && (DateTime.Now.Millisecond / 150) % 2 == 0)
+            {
+                return; // ข้ามการวาดกบเฟรมนี้เพื่อให้เห็นเป็นเอฟเฟกต์กระพริบ
+            }
+
+            // วาดกบตามปกติ
+            g.DrawImage(Sprite, X, Y, Width, Height);
+        }
     }
 }
