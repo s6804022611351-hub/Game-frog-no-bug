@@ -11,7 +11,12 @@ namespace Sec2_Group1_HappyJumpingFrog.Class
             _remainingSeconds = seconds;
         }
 
-        // 📍 ฟังก์ชันอัปเดตเวลานับถอยหลังตาม Delta Time
+        // 📍 เพิ่มฟังก์ชันบวกเวลา (วินาที)
+        public void AddTime(float seconds)
+        {
+            _remainingSeconds += seconds;
+        }
+
         public void Update(float dt)
         {
             if (_remainingSeconds > 0)

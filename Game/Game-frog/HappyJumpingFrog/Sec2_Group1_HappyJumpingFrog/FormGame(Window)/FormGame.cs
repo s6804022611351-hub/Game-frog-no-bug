@@ -22,9 +22,10 @@ namespace Sec2_Group1_HappyJumpingFrog
         private Image _background;              // รูปภาพพื้นหลังเกม
         private Image _lotusImage;              // เก็บรูปดอกบัวไว้ใช้ซ้ำ
         private Items _heartItem;               // ไอเท็มหัวใจ
+        private Items _timeItem;                // 📍 ไอเท็มเพิ่มเวลา
 
-        private const float HeartWidth = 70f;   // ความกว้างไอเท็มหัวใจ
-        private const float HeartHeight = 40f;  // ความสูงไอเท็มหัวใจ
+        private const float HeartWidth = 70f;   // ความกว้างไอเท็ม
+        private const float HeartHeight = 40f;  // ความสูงไอเท็ม
 
         // ค่าคงที่ขนาดสนามเล่นแบบ Virtual Grid (910 x 650)
         private const int WorldHeight = 650;    // ความสูงพื้นที่เกม
@@ -68,7 +69,8 @@ namespace Sec2_Group1_HappyJumpingFrog
         private bool _paused = false;           // สถานะหยุดเกม
         private bool _soundOn = true;           // สถานะปุ่ม SFX
         private bool _musicOn = true;           // สถานะปุ่ม BGM
-        private bool _heartCollectedInLevel = false;
+        private bool _heartCollectedInLevel = false; // สถานะเก็บหัวใจในด่านหลัก
+        private bool _timeCollectedInLevel = false;  // 📍 สถานะเก็บไอเท็มเวลาในด่านหลัก
 
         // หน่วงเวลาการเดิน/กระโดด (100 ms)
         private DateTime _lastHopTime = DateTime.MinValue;
@@ -94,7 +96,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             // 📍 ตั้งค่าเต็มจอ
             this.WindowState = FormWindowState.Maximized;
 
-            // โหลดรูปภาพและสร้างวัตถุเกม (ใช้ background สำหรับด่าน 1)
+            // โหลดรูปภาพและสร้างวัตถุเกม
             _background = Properties.Resources.background;
             _lotusImage = Properties.Resources.lotus;
             _frog = new PlayerFrog(Properties.Resources.frog, StartX, StartY);
@@ -105,6 +107,10 @@ namespace Sec2_Group1_HappyJumpingFrog
             // สร้างไอเท็มหัวใจ
             _heartItem = new Items(Properties.Resources.heart, 0, 0, HeartWidth, HeartHeight);
             _heartItem.SpawnRandom(_fieldWidth, WorldHeight);
+
+            // 📍 สร้างไอเท็มเวลา (ใช้ Properties.Resources.time)
+            _timeItem = new Items(Properties.Resources.time, 0, 0, HeartWidth, HeartHeight);
+            _timeItem.SpawnRandom(_fieldWidth, WorldHeight);
 
             // สร้างนาฬิกา
             _gameTimer = new GameTimer(LevelSeconds[_level - 1]);
@@ -144,7 +150,7 @@ namespace Sec2_Group1_HappyJumpingFrog
         {
             if (_level == 2) _background = Properties.Resources.background2;
             else if (_level == 3) _background = Properties.Resources.background4;
-            else _background = Properties.Resources.background; // 📍 ใช้ background สำหรับด่าน 1
+            else _background = Properties.Resources.background;
         }
 
         protected override void OnResize(EventArgs e)
@@ -179,9 +185,12 @@ namespace Sec2_Group1_HappyJumpingFrog
             if (river != null) river.Draw(g);
             _road?.Draw(g);
 
-            // 📍 แสดงหัวใจเฉพาะเมื่อยังไม่ได้เก็บในด่านหลักนี้
+            // 📍 แสดงหัวใจและไอเท็มเวลาเฉพาะเมื่อยังไม่ได้เก็บในด่านหลักนี้
             if (_heartItem != null && !_heartCollectedInLevel)
                 _heartItem.Draw(g);
+
+            if (_timeItem != null && !_timeCollectedInLevel)
+                _timeItem.Draw(g);
 
             _frog?.Draw(g);
             DrawSidePanel(g);
@@ -332,13 +341,13 @@ namespace Sec2_Group1_HappyJumpingFrog
         }
 
         // ==========================================
-        // 4. Game Loop (timerGame_Tick) - แก้ไขเรียบร้อย
+        // 4. Game Loop (timerGame_Tick)
         // ==========================================
         private void timerGame_Tick(object sender, EventArgs e)
         {
             if (_paused) return;
 
-            // 📍 1. คำนวณเวลา delta time และอัปเดตเวลานับถอยหลัง (ทำให้เวลาเดินตลอดเวลา)
+            // 📍 1. คำนวณเวลา delta time และอัปเดตเวลานับถอยหลัง
             double now = _stopwatch.Elapsed.TotalSeconds;
             float dt = (float)(now - _lastElapsed);
             _lastElapsed = now;
@@ -393,11 +402,11 @@ namespace Sec2_Group1_HappyJumpingFrog
                     _frog.Die();
                     _frog.X = StartX;
                     _frog.Y = StartY;
-                    return; // 📍 ใช้ return; ตรงนี้ได้เพราะอยู่ใน timerGame_Tick (void)
+                    return;
                 }
             }
 
-            // 📍 5. ตรวจจับการเก็บไอเท็มหัวใจ (เก็บได้แค่ 1 ครั้งต่อด่านหลักเท่านั้น)
+            // 📍 5. ตรวจจับการเก็บไอเท็มหัวใจ (เก็บได้แค่ 1 ครั้งต่อด่านหลัก)
             if (!_heartCollectedInLevel && _heartItem != null)
             {
                 RectangleF frogBoundsForHeart = new RectangleF(_frog.X, _frog.Y, _frog.Width, _frog.Height);
@@ -406,11 +415,24 @@ namespace Sec2_Group1_HappyJumpingFrog
                 if (frogBoundsForHeart.IntersectsWith(heartBounds))
                 {
                     _frog.Lives++;
-                    _heartCollectedInLevel = true; // 📍 ล็อกไว้ว่าเก็บหัวใจในด่านนี้แล้ว
+                    _heartCollectedInLevel = true;
                 }
             }
 
-            // 6. ตรวจจับจบเกม (พลังชีวิตหมด หรือ หมดเวลา)
+            // 📍 6. ตรวจจับการเก็บไอเท็มเพิ่มเวลา (+30 วินาที) (เก็บได้แค่ 1 ครั้งต่อด่านหลัก)
+            if (!_timeCollectedInLevel && _timeItem != null)
+            {
+                RectangleF frogBoundsForTime = new RectangleF(_frog.X, _frog.Y, _frog.Width, _frog.Height);
+                RectangleF timeBounds = new RectangleF(_timeItem.X, _timeItem.Y, _timeItem.Width, _timeItem.Height);
+
+                if (frogBoundsForTime.IntersectsWith(timeBounds))
+                {
+                    _gameTimer?.AddTime(30);
+                    _timeCollectedInLevel = true;
+                }
+            }
+
+            // 7. ตรวจจับจบเกม (พลังชีวิตหมด หรือ หมดเวลา)
             if (_frog.Lives <= 0 || _gameTimer.IsTimeUp)
             {
                 timerGame.Stop();
@@ -443,12 +465,12 @@ namespace Sec2_Group1_HappyJumpingFrog
                 _subLevel = 1;
                 _score = 0;
                 _paused = false;
-                _heartCollectedInLevel = false; // 📍 รีเซ็ตหัวใจเมื่อเริ่มเล่นใหม่
+                _heartCollectedInLevel = false;
+                _timeCollectedInLevel = false;
 
                 UpdateLevelBackground();
                 SetLevelDifficulty();
                 BuildLotuses();
-                // ...
             };
 
             failedPanel.EndGameClicked += (s, ev) => {
@@ -463,7 +485,7 @@ namespace Sec2_Group1_HappyJumpingFrog
         }
 
         // ==========================================
-        // 5. ปุ่มทางลัด (Z, X, C, V, B)
+        // 5. ปุ่มทางลัด (Z, X, C, V, B, ;, N, P)
         // ==========================================
         private void CollectLotusByIndex(int index)
         {
@@ -558,7 +580,8 @@ namespace Sec2_Group1_HappyJumpingFrog
             _subLevel = 1;
             _paused = false;
 
-            _heartCollectedInLevel = false; // 📍 รีเซ็ตสิทธิ์เก็บหัวใจเมื่อขึ้น Level ใหม่
+            _heartCollectedInLevel = false;
+            _timeCollectedInLevel = false;
 
             UpdateLevelBackground();
             SetLevelDifficulty();
@@ -572,8 +595,11 @@ namespace Sec2_Group1_HappyJumpingFrog
 
         private void SetLevelDifficulty()
         {
-            _heartCollectedInLevel = false; // 📍 รีเซ็ตให้เก็บหัวใจได้ในด่านหลักใหม่
+            _heartCollectedInLevel = false;
             _heartItem?.SpawnRandom(_fieldWidth, WorldHeight);
+
+            _timeCollectedInLevel = false;
+            _timeItem?.SpawnRandom(_fieldWidth, WorldHeight);
 
             if (_level == 1)
             {
@@ -595,10 +621,10 @@ namespace Sec2_Group1_HappyJumpingFrog
                     LaneHeight,
                     4,
                     new Image[] {
-                Properties.Resources.enemy2,
-                Properties.Resources.enemy1,
-                Properties.Resources.enemy2,
-                Properties.Resources.enemy1
+                        Properties.Resources.enemy2,
+                        Properties.Resources.enemy1,
+                        Properties.Resources.enemy2,
+                        Properties.Resources.enemy1
                     },
                     EnemySpeedLevel3,
                     _fieldWidth,
@@ -644,14 +670,22 @@ namespace Sec2_Group1_HappyJumpingFrog
                 }
             }
 
-            return bestFish; // 📍 คืนค่าชนิด FriendMonster
+            return bestFish;
         }
 
         // ==========================================
-        // 7. ปุ่มควบคุม (WASD, ปุ่มลูกศร, P, Z-B, N)
+        // 7. ปุ่มควบคุม (WASD, ปุ่มลูกศร, P, Z-B, N, ;)
         // ==========================================
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
+            // 📍 ปุ่มลัดเพิ่มเวลา +30 วินาที (กดปุ่ม ;)
+            if (keyData == Keys.OemSemicolon || keyData == Keys.Oem1)
+            {
+                _gameTimer?.AddTime(30);
+                Invalidate();
+                return true;
+            }
+
             if (keyData == Keys.N)
             {
                 _frog.Lives++;
