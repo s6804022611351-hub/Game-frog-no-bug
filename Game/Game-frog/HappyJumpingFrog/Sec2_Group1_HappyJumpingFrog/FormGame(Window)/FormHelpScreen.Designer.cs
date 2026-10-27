@@ -45,10 +45,11 @@
             pictureHelp.BackColor = Color.Transparent;
             pictureHelp.BackgroundImage = (Image)resources.GetObject("pictureHelp.BackgroundImage");
             pictureHelp.BackgroundImageLayout = ImageLayout.Zoom;
+            pictureHelp.Cursor = Cursors.Cross;
             pictureHelp.Dock = DockStyle.Fill;
-            pictureHelp.Location = new Point(3, 223);
+            pictureHelp.Location = new Point(3, 260);
             pictureHelp.Name = "pictureHelp";
-            pictureHelp.Size = new Size(1394, 329);
+            pictureHelp.Size = new Size(1823, 295);
             pictureHelp.SizeMode = PictureBoxSizeMode.Zoom;
             pictureHelp.TabIndex = 0;
             pictureHelp.TabStop = false;
@@ -63,9 +64,9 @@
             label1.Font = new Font("Segoe UI", 36F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label1.ForeColor = Color.White;
             label1.ImageAlign = ContentAlignment.TopCenter;
-            label1.Location = new Point(510, 4);
+            label1.Location = new Point(725, 4);
             label1.Name = "label1";
-            label1.Size = new Size(380, 81);
+            label1.Size = new Size(378, 81);
             label1.TabIndex = 1;
             label1.Text = "How to play";
             // 
@@ -79,16 +80,13 @@
             btnBackformHelp.FlatAppearance.MouseDownBackColor = Color.Transparent;
             btnBackformHelp.FlatAppearance.MouseOverBackColor = Color.Transparent;
             btnBackformHelp.FlatStyle = FlatStyle.Flat;
-            // 📍 ปรับขนาดฟอนต์ Back เป็น 34pt
             btnBackformHelp.Font = new Font("Segoe UI", 34F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnBackformHelp.ForeColor = Color.FromArgb(0, 64, 64);
-            btnBackformHelp.Location = new Point(300, 565);
+            btnBackformHelp.Location = new Point(514, 568);
             btnBackformHelp.Name = "btnBackformHelp";
-            // 📍 ขยายขนาดปุ่มเป็น 800 x 130 ใหญ่ชัดเจน
             btnBackformHelp.Size = new Size(800, 130);
             btnBackformHelp.TabIndex = 2;
             btnBackformHelp.Text = "Back";
-            btnBackformHelp.TextAlign = ContentAlignment.MiddleCenter;
             btnBackformHelp.UseVisualStyleBackColor = false;
             btnBackformHelp.Click += btnBackformHelp_Click;
             // 
@@ -105,12 +103,11 @@
             tableLayoutPanel1.Location = new Point(0, 0);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
             tableLayoutPanel1.RowCount = 4;
-            // 📍 ปรับความสูงแถวล่างสุด (Row 3) เป็น 150px เพื่อรองรับปุ่มใหญ่
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 90F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 130F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 167F));
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 150F));
-            tableLayoutPanel1.Size = new Size(1400, 708);
+            tableLayoutPanel1.Size = new Size(1829, 708);
             tableLayoutPanel1.TabIndex = 3;
             tableLayoutPanel1.Paint += tableLayoutPanel1_Paint;
             // 
@@ -120,24 +117,24 @@
             panel1.BackColor = Color.FromArgb(180, 15, 30, 55);
             panel1.BackgroundImageLayout = ImageLayout.Zoom;
             panel1.Controls.Add(label2);
-            panel1.Location = new Point(13, 95);
+            panel1.Location = new Point(202, 113);
             panel1.Name = "panel1";
             panel1.Padding = new Padding(15);
-            panel1.Size = new Size(1374, 120);
+            panel1.Size = new Size(1424, 120);
             panel1.TabIndex = 3;
             panel1.TabStop = true;
             // 
             // label2
             // 
-            label2.Dock = DockStyle.Fill;
             label2.BackColor = Color.Transparent;
+            label2.Dock = DockStyle.Fill;
             label2.Font = new Font("Segoe UI", 16F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label2.ForeColor = Color.White;
             label2.Location = new Point(15, 15);
             label2.Name = "label2";
-            label2.Size = new Size(1344, 90);
+            label2.Size = new Size(1394, 90);
             label2.TabIndex = 4;
-            label2.Text = "Get your frog safely across the road by don't let's it hits anybody on the road and your frog must stays on \r\nlotus leaf to cross the river to the other side.";
+            label2.Text = "Get your frog safely across the road by don't let's it hits anybody on the road and your frog must stays on lotus leaf to cross the river to the other side.\r\n";
             label2.TextAlign = ContentAlignment.MiddleCenter;
             label2.Click += label2_Click;
             // 
@@ -148,7 +145,7 @@
             BackColor = Color.FromArgb(192, 255, 255);
             BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
             BackgroundImageLayout = ImageLayout.Stretch;
-            ClientSize = new Size(1400, 708);
+            ClientSize = new Size(1829, 708);
             Controls.Add(tableLayoutPanel1);
             ForeColor = Color.FromArgb(0, 64, 64);
             FormBorderStyle = FormBorderStyle.Fixed3D;
