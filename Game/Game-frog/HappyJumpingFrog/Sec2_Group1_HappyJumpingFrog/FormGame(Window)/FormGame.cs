@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
+using System.Media;
 
 namespace Sec2_Group1_HappyJumpingFrog
 {
@@ -22,7 +23,8 @@ namespace Sec2_Group1_HappyJumpingFrog
         private Image _background;              // รูปภาพพื้นหลังเกม
         private Image _lotusImage;              // เก็บรูปดอกบัวไว้ใช้ซ้ำ
         private Items _heartItem;               // ไอเท็มหัวใจ
-        private Items _timeItem;                // 📍 ไอเท็มเพิ่มเวลา
+        private Items _timeItem;                // ไอเท็มเพิ่มเวลา
+        private SoundPlayer _bgmPlayer;         // เพลงพื้นหลัง
 
         private const float HeartWidth = 70f;   // ความกว้างไอเท็ม
         private const float HeartHeight = 40f;  // ความสูงไอเท็ม
@@ -173,6 +175,34 @@ namespace Sec2_Group1_HappyJumpingFrog
             Invalidate();
         }
 
+        
+        /// กำหนดค่าเพลงพื้นหลัง
+        private void InitMusic()
+        {
+            _bgmPlayer = new SoundPlayer(Properties.Resources.bgm);
+            _bgmPlayer.Load();
+            UpdateMusic();
+        }
+
+        // เรียกทุกครั้งที่ _musicOn เปลี่ยน
+        private void UpdateMusic()
+        {
+            if (_bgmPlayer == null) return;
+
+            if (_musicOn) _bgmPlayer.PlayLooping();   // เล่นวนซ้ำ
+            else _bgmPlayer.Stop();
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            _bgmPlayer?.Stop();
+            _bgmPlayer?.Dispose();
+            base.OnFormClosed(e);
+        }
+
+
+
+
         // ==========================================
         // 3. การแสดงผลกราฟิก (OnPaint)
         // ==========================================
@@ -283,9 +313,19 @@ namespace Sec2_Group1_HappyJumpingFrog
             float scaleY = ClientSize.Height / (float)WorldHeight;
             PointF p = new PointF(e.X / scaleX, e.Y / scaleY);
 
-            if (ButtonRect(0).Contains(p)) TogglePause();
-            else if (ButtonRect(1).Contains(p)) _soundOn = !_soundOn;
-            else if (ButtonRect(2).Contains(p)) _musicOn = !_musicOn;
+            if (ButtonRect(0).Contains(p))
+            {
+                TogglePause();
+            }
+            else if (ButtonRect(1).Contains(p))
+            {
+                _soundOn = !_soundOn;
+            }
+            else if (ButtonRect(2).Contains(p))
+            {
+                _musicOn = !_musicOn;
+                UpdateMusic();         
+            }
 
             Invalidate();
         }
@@ -332,6 +372,7 @@ namespace Sec2_Group1_HappyJumpingFrog
                 _lastHopTime = DateTime.MinValue;
 
                 timerGame.Start();
+                
                 _lastElapsed = _stopwatch.Elapsed.TotalSeconds;
             };
 
@@ -346,11 +387,19 @@ namespace Sec2_Group1_HappyJumpingFrog
 
             pausePanel.MusicToggleClicked += (s, ev) => {
                 _musicOn = !_musicOn;
+                UpdateMusic();
                 Invalidate();
             };
 
+
             this.Controls.Add(pausePanel);
             pausePanel.BringToFront();
+        }
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+            InitMusic();     // เริ่มเพลงหลังหน้าเกมขึ้นแล้ว
         }
 
         // ==========================================
@@ -613,11 +662,14 @@ namespace Sec2_Group1_HappyJumpingFrog
 
         private void ReturnToMenu()
         {
+            _bgmPlayer?.Stop();         
             this.Hide();
             FormMenu menuForm = new FormMenu();
             menuForm.ShowDialog(this);
             this.Close();
         }
+
+
 
         private void StartNextLevel()
         {
