@@ -8,8 +8,12 @@ namespace HappyJumpingFrog
 {
     public class PlayerFrog : GameObject
     {
+        // แถวเริ่มต้น (ด่าน 1-2)
+        public static readonly float[] DefaultRows = { 590, 513, 451, 389, 334, 270, 200, 130, 50 };
 
-        private static readonly float[] RowCenters = { 590, 513, 451, 389, 334, 270, 200, 130, 50 };
+        // แถวที่กบกระโดดไปได้ เปลี่ยนได้ตามด่าน
+        public float[] RowCenters { get; set; } = DefaultRows;
+
         private DateTime _invulnerableUntil = DateTime.MinValue; //อมตะ
         public bool IsInvulnerable => DateTime.Now < _invulnerableUntil;
 
@@ -45,13 +49,10 @@ namespace HappyJumpingFrog
             if (X > areaWidth - Width) X = areaWidth - Width;
         }
 
-
-
-
-        // 📍 ปรับความไว / ระยะกระโดดต่อก้าวตรงนี้ (ปรับตัวเลขเปลี่ยนความไวได้ทันที)
+        // 📍 ปรับความไว / ระยะกระโดดต่อก้าวตรงนี้
         // - อยากให้กระโดดเร็ว/ไกลขึ้น: ปรับเพิ่มเป็น 60, 65, หรือ 70
         // - อยากให้กระโดดช้า/ละเอียดขึ้น: ปรับลดเป็น 35, 40, หรือ 45
-        public int HopSize { get; set; } = 50; 
+        public int HopSize { get; set; } = 50;
 
         private readonly float _startX, _startY;
 
@@ -66,7 +67,6 @@ namespace HappyJumpingFrog
             Lives = 5;
         }
 
-
         public void Die()
         {
             // ถ้ากบยังอยู่ในสถานะอมตะ จะไม่โดนคำสั่ง Die ซ้ำ
@@ -78,18 +78,18 @@ namespace HappyJumpingFrog
             this.X = 350f;
             this.Y = 565f;
 
-            // ตั้งเวลาให้อมตะเป็นเวลา 1 วินาที (1000 ms) นับจากเวลานี้
+            // ตั้งเวลาให้อมตะเป็นเวลา 1 วินาที
             _invulnerableUntil = DateTime.Now.AddSeconds(1);
         }
+
         public void Draw(Graphics g)
         {
-            // ถ้ากำลังอมตะ ให้กระพริบตามมิลลิวินาที (แสดงตัวกบแค่บางเฟรม)
+            // ถ้ากำลังอมตะ ให้กระพริบ
             if (IsInvulnerable && (DateTime.Now.Millisecond / 150) % 2 == 0)
             {
-                return; // ข้ามการวาดกบเฟรมนี้เพื่อให้เห็นเป็นเอฟเฟกต์กระพริบ
+                return;
             }
 
-            // วาดกบตามปกติ
             g.DrawImage(Sprite, X, Y, Width, Height);
         }
     }

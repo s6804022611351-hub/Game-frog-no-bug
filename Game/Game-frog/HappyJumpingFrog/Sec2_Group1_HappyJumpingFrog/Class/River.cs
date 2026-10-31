@@ -57,7 +57,7 @@ namespace Sec2_Group1_HappyJumpingFrog.Class
         }
 
         public void Draw(Graphics g)
-        {
+           {
             foreach (var fish in Friends)
                 fish.Draw(g);
         }

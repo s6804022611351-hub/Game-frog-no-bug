@@ -37,6 +37,19 @@ namespace Sec2_Group1_HappyJumpingFrog
         private const float RoadTop = 358;      // ขอบบนถนน
         private const float LaneHeight = 62;    // ความสูงต่อเลน
 
+        private const float RoadTopLevel3 = 388; // ขอบบนถนนเลเวล 3
+        private const float LaneHeightLevel3 = 59.5f; // ความสูงต่อเลนเลเวล 3
+
+        private static readonly float[] RowsLevel3 =
+        {
+            RoadTopLevel3 + 3.5f * LaneHeightLevel3,   // เลนล่างสุด
+            RoadTopLevel3 + 2.5f * LaneHeightLevel3,
+            RoadTopLevel3 + 1.5f * LaneHeightLevel3,
+            RoadTopLevel3 + 0.5f * LaneHeightLevel3,   // เลนบนสุด
+            339, 277, 215, 153,                        // แถวปลา 4 แถว (ค่าประมาณ)
+            69                                         // แถวใบบัว
+        };
+
         // จุดเริ่มต้นของกบ
         private const float StartX = 350;
         private const float StartY = 565;
@@ -385,6 +398,16 @@ namespace Sec2_Group1_HappyJumpingFrog
             float frogCenterY = _frog.Y + _frog.Height / 2f;
             float riverMinY = (_level == 3) ? 110f : 100f;
             float riverMaxY = (_level == 3) ? 360f : 290f;
+
+            //  4.1 ถึงแถวบัวแล้วแต่ไม่ได้ชนใบบัว (ถ้าชนจะถูกเก็บและ return ไปแล้วใน ข้อ 3) -> ตกน้ำตาย
+            if (!_frog.IsInvulnerable && frogCenterY < riverMinY)
+            {
+                _frog.Die();
+                _frog.X = StartX;
+                _frog.Y = StartY;
+                return;
+            }
+
             if (!_frog.IsInvulnerable && frogCenterY >= riverMinY && frogCenterY <= riverMaxY)
             {
                 FriendMonster fish = FindFishUnderFrog();
@@ -615,6 +638,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             timerGame.Start();
         }
 
+
         private void SetLevelDifficulty()
         {
             _heartCollectedInLevel = false;
@@ -626,27 +650,30 @@ namespace Sec2_Group1_HappyJumpingFrog
             if (_level == 1)
             {
                 this.BackgroundImage = Properties.Resources.background;
+                _frog.RowCenters = PlayerFrog.DefaultRows;
                 _road = new Road(RoadTop, LaneHeight, 3, new Image[] { Properties.Resources.enemy1, Properties.Resources.enemy2, Properties.Resources.enemy1 }, EnemySpeedLevel1, _fieldWidth);
                 river = new River(_fieldWidth, 3, 1);
             }
             else if (_level == 2)
             {
                 this.BackgroundImage = Properties.Resources.background2;
+                _frog.RowCenters = PlayerFrog.DefaultRows;
                 _road = new Road(RoadTop, LaneHeight, 4, new Image[] { Properties.Resources.enemy2, Properties.Resources.enemy1, Properties.Resources.enemy2, Properties.Resources.enemy1 }, EnemySpeedLevel2, _fieldWidth, true);
                 river = new River(_fieldWidth, 3, 2);
             }
             else if (_level == 3)
             {
                 this.BackgroundImage = Properties.Resources.background4;
+                _frog.RowCenters = RowsLevel3;
                 _road = new Road(
-                    RoadTop,
-                    LaneHeight,
+                    RoadTopLevel3,
+                    LaneHeightLevel3,
                     4,
                     new Image[] {
-                        Properties.Resources.enemy2,
-                        Properties.Resources.enemy1,
-                        Properties.Resources.enemy2,
-                        Properties.Resources.enemy1
+                Properties.Resources.enemy2,
+                Properties.Resources.enemy1,
+                Properties.Resources.enemy2,
+                Properties.Resources.enemy1
                     },
                     EnemySpeedLevel3,
                     _fieldWidth,
