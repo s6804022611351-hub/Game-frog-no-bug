@@ -64,5 +64,6 @@ namespace Sec2_Group1_HappyJumpingFrog
             // 3. ปิดหน้าจอ Game Over นี้ลง
             this.Close();
         }
+
     }
 }
