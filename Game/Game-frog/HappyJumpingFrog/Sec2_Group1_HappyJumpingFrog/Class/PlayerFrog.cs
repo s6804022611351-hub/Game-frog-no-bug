@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using Sec2_Group1_HappyJumpingFrog;
+using Sec2_Group1_HappyJumpingFrog.Class;
 
 namespace HappyJumpingFrog
 {
@@ -73,6 +75,7 @@ namespace HappyJumpingFrog
             if (IsInvulnerable) return;
 
             Lives--;
+            SoundManager.PlaySfx("die");
 
             // วาร์ปกบกลับจุดเกิดทันที
             this.X = 350f;

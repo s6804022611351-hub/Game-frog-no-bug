@@ -7,7 +7,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
-using System.Media;
+
 
 namespace Sec2_Group1_HappyJumpingFrog
 {
@@ -24,7 +24,6 @@ namespace Sec2_Group1_HappyJumpingFrog
         private Image _lotusImage;              // เก็บรูปดอกบัวไว้ใช้ซ้ำ
         private Items _heartItem;               // ไอเท็มหัวใจ
         private Items _timeItem;                // ไอเท็มเพิ่มเวลา
-        private SoundPlayer _bgmPlayer;         // เพลงพื้นหลัง
         private bool _closingByCode = false;    // true = โค้ดสั่งปิดเอง ไม่ใช่ผู้ใช้กด X
 
         private const float HeartWidth = 70f;   // ความกว้างไอเท็ม
@@ -88,7 +87,7 @@ namespace Sec2_Group1_HappyJumpingFrog
         private bool _soundOn = true;           // สถานะปุ่ม SFX
         private bool _musicOn = true;           // สถานะปุ่ม BGM
         private bool _heartCollectedInLevel = false; // สถานะเก็บหัวใจในด่านหลัก
-        private bool _timeCollectedInLevel = false;  // 📍 สถานะเก็บไอเท็มเวลาในด่านหลัก
+        private bool _timeCollectedInLevel = false;  // สถานะเก็บไอเท็มเวลาในด่านหลัก
 
         // หน่วงเวลาการเดิน/กระโดด (100 ms)
         private DateTime _lastHopTime = DateTime.MinValue;
@@ -111,7 +110,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             ResizeRedraw = true;
             KeyPreview = true;
 
-            // 📍 ตั้งค่าเต็มจอ
+            // ตั้งค่าเต็มจอ
             this.WindowState = FormWindowState.Maximized;
 
             // โหลดรูปภาพและสร้างวัตถุเกม
@@ -126,7 +125,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             _heartItem = new Items(Properties.Resources.heart, 0, 0, HeartWidth, HeartHeight);
             _heartItem.SpawnRandom(_fieldWidth, WorldHeight);
 
-            // 📍 สร้างไอเท็มเวลา (ใช้ Properties.Resources.time)
+            // สร้างไอเท็มเวลา (ใช้ Properties.Resources.time)
             _timeItem = new Items(Properties.Resources.time, 0, 0, HeartWidth, HeartHeight);
             _timeItem.SpawnRandom(_fieldWidth, WorldHeight);
 
@@ -141,6 +140,44 @@ namespace Sec2_Group1_HappyJumpingFrog
             timerGame.Start();
         }
 
+        // ==========================================
+        // เสียง (ใช้ SoundManager)
+        // ==========================================
+        private void InitMusic()
+        {
+            SoundManager.SfxOn = _soundOn;
+            SoundManager.InitSfx("jump", "die", "got_item", "got_lotus");
+            UpdateMusic();
+        }
+
+        // เรียกทุกครั้งที่ _musicOn เปลี่ยน
+        private void UpdateMusic()
+        {
+            if (_musicOn) SoundManager.PlayBgm();
+            else SoundManager.StopBgm();
+        }
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+            InitMusic();     // เริ่มเพลงหลังหน้าเกมขึ้นแล้ว
+        }
+
+        // ผู้ใช้กด X -> ปิดโปรแกรมทั้งตัว
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+
+            if (!_closingByCode && e.CloseReason == CloseReason.UserClosing)
+            {
+                SoundManager.StopBgm();
+                Application.Exit();
+            }
+        }
+
+        // ==========================================
+        // สร้างดอกบัว / พื้นหลัง
+        // ==========================================
         private void BuildLotuses()
         {
             _lotuses.Clear();
@@ -178,46 +215,6 @@ namespace Sec2_Group1_HappyJumpingFrog
             Invalidate();
         }
 
-        
-        /// กำหนดค่าเพลงพื้นหลัง
-        private void InitMusic()
-        {
-            _bgmPlayer = new SoundPlayer(Properties.Resources.bgm);
-            _bgmPlayer.Load();
-            UpdateMusic();
-        }
-
-        // เรียกทุกครั้งที่ _musicOn เปลี่ยน
-        private void UpdateMusic()
-        {
-            if (_bgmPlayer == null) return;
-
-            if (_musicOn) _bgmPlayer.PlayLooping();   // เล่นวนซ้ำ
-            else _bgmPlayer.Stop();
-        }
-
-        // กดปิดเกม
-        protected override void OnFormClosed(FormClosedEventArgs e)
-        {
-            _bgmPlayer?.Stop();
-            _bgmPlayer?.Dispose();
-            base.OnFormClosed(e);
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            base.OnFormClosing(e);
-
-            if (!_closingByCode && e.CloseReason == CloseReason.UserClosing)
-            {
-                Application.Exit();
-            }
-        
-        }
-
-
-
-
         // ==========================================
         // 3. การแสดงผลกราฟิก (OnPaint)
         // ==========================================
@@ -227,7 +224,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             Graphics g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
-            // 📍 คำนวณ Scale ปรับขนาดสนามเสมือน (910x650) ให้เต็มจออย่างสมบูรณ์
+            // คำนวณ Scale ปรับขนาดสนามเสมือน (910x650) ให้เต็มจอ
             float scaleX = ClientSize.Width / (float)(_fieldWidth + PanelWidth);
             float scaleY = ClientSize.Height / (float)WorldHeight;
             g.ScaleTransform(scaleX, scaleY);
@@ -243,7 +240,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             if (river != null) river.Draw(g);
             _road?.Draw(g);
 
-            // 📍 แสดงหัวใจและไอเท็มเวลาเฉพาะเมื่อยังไม่ได้เก็บในด่านหลักนี้
+            // แสดงหัวใจและไอเท็มเวลาเฉพาะเมื่อยังไม่ได้เก็บในด่านหลักนี้
             if (_heartItem != null && !_heartCollectedInLevel)
                 _heartItem.Draw(g);
 
@@ -335,11 +332,12 @@ namespace Sec2_Group1_HappyJumpingFrog
             else if (ButtonRect(1).Contains(p))
             {
                 _soundOn = !_soundOn;
+                SoundManager.SfxOn = _soundOn;
             }
             else if (ButtonRect(2).Contains(p))
             {
                 _musicOn = !_musicOn;
-                UpdateMusic();         
+                UpdateMusic();
             }
 
             Invalidate();
@@ -387,7 +385,6 @@ namespace Sec2_Group1_HappyJumpingFrog
                 _lastHopTime = DateTime.MinValue;
 
                 timerGame.Start();
-                
                 _lastElapsed = _stopwatch.Elapsed.TotalSeconds;
             };
 
@@ -397,6 +394,7 @@ namespace Sec2_Group1_HappyJumpingFrog
 
             pausePanel.SoundToggleClicked += (s, ev) => {
                 _soundOn = !_soundOn;
+                SoundManager.SfxOn = _soundOn;
                 Invalidate();
             };
 
@@ -406,15 +404,8 @@ namespace Sec2_Group1_HappyJumpingFrog
                 Invalidate();
             };
 
-
             this.Controls.Add(pausePanel);
             pausePanel.BringToFront();
-        }
-
-        protected override void OnShown(EventArgs e)
-        {
-            base.OnShown(e);
-            InitMusic();     // เริ่มเพลงหลังหน้าเกมขึ้นแล้ว
         }
 
         // ==========================================
@@ -424,7 +415,7 @@ namespace Sec2_Group1_HappyJumpingFrog
         {
             if (_paused) return;
 
-            // 📍 1. คำนวณเวลา delta time และอัปเดตเวลานับถอยหลัง
+            // 1. คำนวณเวลา delta time และอัปเดตเวลานับถอยหลัง
             double now = _stopwatch.Elapsed.TotalSeconds;
             float dt = (float)(now - _lastElapsed);
             _lastElapsed = now;
@@ -433,7 +424,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             river?.UpdateFriends();
             _road?.Update();
 
-            // 2. ตรวจจับการชนศัตรูบนถนน
+            // 2. ตรวจจับการชนศัตรูบนถนน (ไม่ตรวจเมื่ออยู่แถวจุดเกิด)
             bool inStartZone = (_frog.Y + _frog.Height / 2f) >= StartSafeCenterY;
 
             if (!inStartZone && !_frog.IsInvulnerable && _road != null && _road.CheckCollision(_frog))
@@ -465,7 +456,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             float riverMinY = (_level == 3) ? 110f : 100f;
             float riverMaxY = (_level == 3) ? 360f : 290f;
 
-            //  4.1 ถึงแถวบัวแล้วแต่ไม่ได้ชนใบบัว (ถ้าชนจะถูกเก็บและ return ไปแล้วใน ข้อ 3) -> ตกน้ำตาย
+            // 4.1 ถึงแถวบัวแล้วแต่ไม่ได้ชนใบบัว -> ตกน้ำตาย
             if (!_frog.IsInvulnerable && frogCenterY < riverMinY)
             {
                 _frog.Die();
@@ -479,7 +470,7 @@ namespace Sec2_Group1_HappyJumpingFrog
                 FriendMonster fish = FindFishUnderFrog();
                 if (fish != null)
                 {
-                    // ✅ ขี่ปลา -> เกาะลอยตามปลา
+                    // ขี่ปลา -> เกาะลอยตามปลา
                     _frog.X += fish.SwimSpeed;
 
                     if (_frog.X < 0) _frog.X = 0;
@@ -487,7 +478,7 @@ namespace Sec2_Group1_HappyJumpingFrog
                 }
                 else
                 {
-                    // ❌ ตกลงผิวน้ำ (ไม่มีปลาใต้เท้า) -> ตายทันที!
+                    // ตกลงผิวน้ำ (ไม่มีปลาใต้เท้า) -> ตายทันที
                     _frog.Die();
                     _frog.X = StartX;
                     _frog.Y = StartY;
@@ -495,7 +486,7 @@ namespace Sec2_Group1_HappyJumpingFrog
                 }
             }
 
-            // 📍 5. ตรวจจับการเก็บไอเท็มหัวใจ (เก็บได้แค่ 1 ครั้งต่อด่านหลัก)
+            // 5. ตรวจจับการเก็บไอเท็มหัวใจ (เก็บได้แค่ 1 ครั้งต่อด่านหลัก)
             if (!_heartCollectedInLevel && _heartItem != null)
             {
                 RectangleF frogBoundsForHeart = new RectangleF(_frog.X, _frog.Y, _frog.Width, _frog.Height);
@@ -505,10 +496,11 @@ namespace Sec2_Group1_HappyJumpingFrog
                 {
                     _frog.Lives++;
                     _heartCollectedInLevel = true;
+                    SoundManager.PlaySfx("got_item");
                 }
             }
 
-            // 📍 6. ตรวจจับการเก็บไอเท็มเพิ่มเวลา (+30 วินาที) (เก็บได้แค่ 1 ครั้งต่อด่านหลัก)
+            // 6. ตรวจจับการเก็บไอเท็มเพิ่มเวลา (+30 วินาที) (เก็บได้แค่ 1 ครั้งต่อด่านหลัก)
             if (!_timeCollectedInLevel && _timeItem != null)
             {
                 RectangleF frogBoundsForTime = new RectangleF(_frog.X, _frog.Y, _frog.Width, _frog.Height);
@@ -518,6 +510,7 @@ namespace Sec2_Group1_HappyJumpingFrog
                 {
                     _gameTimer?.AddTime(30);
                     _timeCollectedInLevel = true;
+                    SoundManager.PlaySfx("got_item");
                 }
             }
 
@@ -541,16 +534,17 @@ namespace Sec2_Group1_HappyJumpingFrog
 
             UserControlLevelFailed failedPanel = new UserControlLevelFailed(_score);
 
+            failedPanel.Dock = DockStyle.None;
             failedPanel.Location = new Point(
                 Math.Max(0, (this.ClientSize.Width - failedPanel.Width) / 2),
                 Math.Max(0, (this.ClientSize.Height - failedPanel.Height) / 2)
-            );
+            );   // ยืดเต็มจอ
 
             failedPanel.TryAgainClicked += (s, ev) =>
             {
                 this.Controls.Remove(failedPanel);
 
-                // 📍 1. รีเซ็ตตัวแปรด่าน คะแนน และสถานะไอเท็ม
+                // 1. รีเซ็ตตัวแปรด่าน คะแนน และสถานะไอเท็ม
                 _level = 1;
                 _subLevel = 1;
                 _score = 0;
@@ -558,7 +552,7 @@ namespace Sec2_Group1_HappyJumpingFrog
                 _heartCollectedInLevel = false;
                 _timeCollectedInLevel = false;
 
-                // 📍 2. รีเซ็ตชีวิตกบกลับเป็น 3 และย้ายกบกลับจุดเริ่มต้น
+                // 2. รีเซ็ตชีวิตกบและย้ายกลับจุดเริ่มต้น
                 if (_frog != null)
                 {
                     _frog.Lives = 3;
@@ -566,15 +560,15 @@ namespace Sec2_Group1_HappyJumpingFrog
                     _frog.Y = StartY;
                 }
 
-                // 📍 3. รีเซ็ตเวลานับถอยหลังด่าน 1 ใหม่ (1500 วินาที)
+                // 3. รีเซ็ตเวลานับถอยหลังด่าน 1 ใหม่
                 _gameTimer?.Reset(LevelSeconds[0]);
 
-                // 📍 4. อัปเดตฉาก ความยาก และสร้างดอกบัวใหม่
+                // 4. อัปเดตฉาก ความยาก และสร้างดอกบัวใหม่
                 UpdateLevelBackground();
                 SetLevelDifficulty();
                 BuildLotuses();
 
-                // 📍 5. เริ่มเวลาเกมใหม่ และดึง Focus คีย์บอร์ดกลับมา
+                // 5. เริ่มเวลาเกมใหม่ และดึง Focus คีย์บอร์ดกลับมา
                 _lastHopTime = DateTime.MinValue;
                 _lastElapsed = _stopwatch.Elapsed.TotalSeconds;
                 timerGame.Start();
@@ -585,6 +579,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             };
 
             failedPanel.EndGameClicked += (s, ev) => {
+                SoundManager.StopBgm();
                 this.Hide();
                 FormGameOver gameOverForm = new FormGameOver(_score);
                 gameOverForm.ShowDialog(this);
@@ -597,7 +592,7 @@ namespace Sec2_Group1_HappyJumpingFrog
         }
 
         // ==========================================
-        // 5. ปุ่มทางลัด (Z, X, C, V, B, ;, N, P)
+        // 5. เก็บดอกบัว (และปุ่มทางลัด Z, X, C, V, B)
         // ==========================================
         private void CollectLotusByIndex(int index)
         {
@@ -608,6 +603,7 @@ namespace Sec2_Group1_HappyJumpingFrog
                 if (!lotus.IsCollected)
                 {
                     lotus.IsCollected = true;
+                    SoundManager.PlaySfx("got_lotus");
                     _goal++;
                     _score += 1;
 
@@ -680,16 +676,13 @@ namespace Sec2_Group1_HappyJumpingFrog
 
         private void ReturnToMenu()
         {
-            _bgmPlayer?.Stop();         
+            SoundManager.StopBgm();
             this.Hide();
             FormMenu menuForm = new FormMenu();
             menuForm.ShowDialog(this);
             _closingByCode = true;
             this.Close();
-
         }
-
-
 
         private void StartNextLevel()
         {
@@ -709,7 +702,6 @@ namespace Sec2_Group1_HappyJumpingFrog
 
             timerGame.Start();
         }
-
 
         private void SetLevelDifficulty()
         {
@@ -742,10 +734,10 @@ namespace Sec2_Group1_HappyJumpingFrog
                     LaneHeightLevel3,
                     4,
                     new Image[] {
-                Properties.Resources.enemy2,
-                Properties.Resources.enemy1,
-                Properties.Resources.enemy2,
-                Properties.Resources.enemy1
+                        Properties.Resources.enemy2,
+                        Properties.Resources.enemy1,
+                        Properties.Resources.enemy2,
+                        Properties.Resources.enemy1
                     },
                     EnemySpeedLevel3,
                     _fieldWidth,
@@ -755,7 +747,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             }
         }
 
-        // 📍 ฟังก์ชันตรวจจับว่ากบเหยียบอยู่บนตัวปลาตัวไหน
+        // ฟังก์ชันตรวจจับว่ากบเหยียบอยู่บนตัวปลาตัวไหน
         private FriendMonster FindFishUnderFrog()
         {
             if (river == null || river.Friends == null) return null;
@@ -795,7 +787,7 @@ namespace Sec2_Group1_HappyJumpingFrog
         }
 
         // ==========================================
-        // 7. ปุ่มควบคุม (WASD, ปุ่มลูกศร, P, Z-B, N, ;)
+        // 7. ปุ่มควบคุม (WASD, ปุ่มลูกศร, P, Esc, Z-B, N, ;)
         // ==========================================
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
@@ -806,10 +798,9 @@ namespace Sec2_Group1_HappyJumpingFrog
                 else ReturnToMenu();
                 Invalidate();
                 return true;
-
             }
 
-            // 📍 ปุ่มลัดเพิ่มเวลา +30 วินาที (กดปุ่ม ;)
+            // ปุ่มลัดเพิ่มเวลา +30 วินาที (กดปุ่ม ;)
             if (keyData == Keys.OemSemicolon || keyData == Keys.Oem1)
             {
                 _gameTimer?.AddTime(30);
@@ -858,7 +849,15 @@ namespace Sec2_Group1_HappyJumpingFrog
                 {
                     if ((DateTime.Now - _lastHopTime).TotalMilliseconds >= HopCooldownMs)
                     {
+                        float oldX = _frog.X;
+                        float oldY = _frog.Y;
+
                         _frog.Hop(moveKey, _fieldWidth, WorldHeight);
+
+                        // เล่นเสียงเฉพาะตอนกบขยับจริง
+                        if (_frog.X != oldX || _frog.Y != oldY)
+                            SoundManager.PlaySfx("jump");
+
                         _lastHopTime = DateTime.Now;
                         Invalidate();
                     }
@@ -867,14 +866,10 @@ namespace Sec2_Group1_HappyJumpingFrog
             }
 
             return base.ProcessCmdKey(ref msg, keyData);
-
-          
         }
 
-
-
         private void FormGame_Load(object sender, EventArgs e)
-        { 
+        {
         }
     }
 }
