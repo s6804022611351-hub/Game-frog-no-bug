@@ -555,7 +555,7 @@ namespace Sec2_Group1_HappyJumpingFrog
                 // 2. รีเซ็ตชีวิตกบและย้ายกลับจุดเริ่มต้น
                 if (_frog != null)
                 {
-                    _frog.Lives = 3;
+                    _frog.Lives = 5;
                     _frog.X = StartX;
                     _frog.Y = StartY;
                 }
