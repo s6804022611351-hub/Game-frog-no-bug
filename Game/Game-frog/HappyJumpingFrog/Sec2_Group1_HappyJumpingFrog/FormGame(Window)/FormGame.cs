@@ -25,6 +25,7 @@ namespace Sec2_Group1_HappyJumpingFrog
         private Items _heartItem;               // ไอเท็มหัวใจ
         private Items _timeItem;                // ไอเท็มเพิ่มเวลา
         private SoundPlayer _bgmPlayer;         // เพลงพื้นหลัง
+        private bool _closingByCode = false;    // true = โค้ดสั่งปิดเอง ไม่ใช่ผู้ใช้กด X
 
         private const float HeartWidth = 70f;   // ความกว้างไอเท็ม
         private const float HeartHeight = 40f;  // ความสูงไอเท็ม
@@ -195,11 +196,23 @@ namespace Sec2_Group1_HappyJumpingFrog
             else _bgmPlayer.Stop();
         }
 
+        // กดปิดเกม
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             _bgmPlayer?.Stop();
             _bgmPlayer?.Dispose();
             base.OnFormClosed(e);
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+
+            if (!_closingByCode && e.CloseReason == CloseReason.UserClosing)
+            {
+                Application.Exit();
+            }
+        
         }
 
 
@@ -575,6 +588,7 @@ namespace Sec2_Group1_HappyJumpingFrog
                 this.Hide();
                 FormGameOver gameOverForm = new FormGameOver(_score);
                 gameOverForm.ShowDialog(this);
+                _closingByCode = true;
                 this.Close();
             };
 
@@ -670,6 +684,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             this.Hide();
             FormMenu menuForm = new FormMenu();
             menuForm.ShowDialog(this);
+            _closingByCode = true;
             this.Close();
 
         }
@@ -791,6 +806,7 @@ namespace Sec2_Group1_HappyJumpingFrog
                 else ReturnToMenu();
                 Invalidate();
                 return true;
+
             }
 
             // 📍 ปุ่มลัดเพิ่มเวลา +30 วินาที (กดปุ่ม ;)
@@ -851,6 +867,8 @@ namespace Sec2_Group1_HappyJumpingFrog
             }
 
             return base.ProcessCmdKey(ref msg, keyData);
+
+          
         }
 
 
