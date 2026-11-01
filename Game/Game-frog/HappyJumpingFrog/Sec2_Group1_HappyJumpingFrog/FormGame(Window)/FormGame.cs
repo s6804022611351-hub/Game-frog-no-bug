@@ -671,6 +671,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             FormMenu menuForm = new FormMenu();
             menuForm.ShowDialog(this);
             this.Close();
+
         }
 
 
@@ -783,6 +784,15 @@ namespace Sec2_Group1_HappyJumpingFrog
         // ==========================================
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
+            // Esc: กดครั้งแรก = หยุดเกม, กดอีกครั้งตอนหยุดอยู่ = กลับเมนู
+            if (keyData == Keys.Escape)
+            {
+                if (!_paused) TogglePause();
+                else ReturnToMenu();
+                Invalidate();
+                return true;
+            }
+
             // 📍 ปุ่มลัดเพิ่มเวลา +30 วินาที (กดปุ่ม ;)
             if (keyData == Keys.OemSemicolon || keyData == Keys.Oem1)
             {
@@ -842,6 +852,8 @@ namespace Sec2_Group1_HappyJumpingFrog
 
             return base.ProcessCmdKey(ref msg, keyData);
         }
+
+
 
         private void FormGame_Load(object sender, EventArgs e)
         { 
