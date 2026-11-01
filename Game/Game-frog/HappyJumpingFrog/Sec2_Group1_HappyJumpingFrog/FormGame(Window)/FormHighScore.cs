@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Text;
 using System.Windows.Forms;
 
@@ -53,37 +54,38 @@ namespace Sec2_Group1_HappyJumpingFrog
         private void SetupUI()
         {
             this.Text = "High Scores";
-            this.ClientSize = new Size(600, 450);
+            this.ClientSize = new Size(580, 420);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.None;
-            this.BackColor = Color.White;
+            this.BackColor = Color.FromArgb(253, 253, 253); // ขาวนวลสะอาดตาแบบมินิมอล
 
-            this.Paint += (sender, e) =>
-            {
-                e.Graphics.DrawRectangle(Pens.LightGray, 0, 0, this.ClientSize.Width - 1, this.ClientSize.Height - 1);
-            };
-
+            // ปุ่มปิด (Minimal X)
             btnClose = new Button();
             btnClose.Text = "✕";
-            btnClose.Font = new Font("Arial", 12, FontStyle.Bold);
-            btnClose.ForeColor = Color.Gray;
+            btnClose.Font = new Font("Segoe UI", 11, FontStyle.Regular);
+            btnClose.ForeColor = Color.FromArgb(150, 150, 150);
+            btnClose.BackColor = Color.Transparent;
             btnClose.FlatStyle = FlatStyle.Flat;
             btnClose.FlatAppearance.BorderSize = 0;
-            btnClose.Location = new Point(555, 12);
-            btnClose.Size = new Size(35, 35);
+            btnClose.FlatAppearance.MouseOverBackColor = Color.FromArgb(240, 240, 240);
+            btnClose.Location = new Point(535, 12);
+            btnClose.Size = new Size(32, 32);
+            btnClose.Cursor = Cursors.Hand;
             btnClose.Click += (sender, e) => { this.Close(); };
             this.Controls.Add(btnClose);
 
+            // แท็บเมนูด้านบน (สไตล์มินิมอล ตัวหนังสือสะอาดตา)
             string[] tabs = { "TODAY", "LAST WEEK", "LAST MONTH", "ALL TIME", "MY SCORES" };
-            int startX = 20;
-            int startY = 20;
+            int startX = 25;
+            int startY = 22;
 
             for (int i = 0; i < tabs.Length; i++)
             {
                 Button btn = new Button();
                 btn.Text = tabs[i];
-                btn.Font = new Font("Arial", 10, FontStyle.Bold);
-                btn.ForeColor = (tabs[i] == "TODAY") ? Color.Black : Color.Gray;
+                btn.Font = new Font("Segoe UI", 9, (tabs[i] == "TODAY") ? FontStyle.Bold : FontStyle.Regular);
+                btn.ForeColor = (tabs[i] == "TODAY") ? Color.FromArgb(40, 40, 40) : Color.FromArgb(160, 160, 160);
+                btn.BackColor = Color.Transparent;
                 btn.FlatStyle = FlatStyle.Flat;
                 btn.FlatAppearance.BorderSize = 0;
                 btn.Location = new Point(startX, startY);
@@ -95,32 +97,55 @@ namespace Sec2_Group1_HappyJumpingFrog
                 btn.Click += (sender, e) => {
                     foreach (Button b in tabButtons)
                     {
-                        b.ForeColor = Color.Gray;
+                        b.Font = new Font("Segoe UI", 9, FontStyle.Regular);
+                        b.ForeColor = Color.FromArgb(160, 160, 160);
                     }
-                    btn.ForeColor = Color.Black;
+                    btn.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+                    btn.ForeColor = Color.FromArgb(40, 40, 40);
                     LoadScoreData(tabName);
                 };
 
                 this.Controls.Add(btn);
                 tabButtons.Add(btn);
-                startX += btn.Width + 15;
+                startX += btn.Width + 12;
             }
 
+            // เส้นคั่นบางๆ แบบจางมากๆ
             Panel line = new Panel();
-            line.Size = new Size(560, 1);
-            line.Location = new Point(20, 60);
-            line.BackColor = Color.LightGray;
+            line.Size = new Size(530, 1);
+            line.Location = new Point(25, 55);
+            line.BackColor = Color.FromArgb(235, 235, 235);
             this.Controls.Add(line);
 
+            // DataGridView สไตล์มินิมอล (ไร้เส้นตารางรกตา)
             dgvScores = new DataGridView();
-            dgvScores.Location = new Point(20, 80);
-            dgvScores.Size = new Size(560, 340);
+            dgvScores.Location = new Point(25, 70);
+            dgvScores.Size = new Size(530, 320);
             dgvScores.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvScores.BackgroundColor = Color.White;
+            dgvScores.BackgroundColor = Color.FromArgb(253, 253, 253);
             dgvScores.BorderStyle = BorderStyle.None;
+            dgvScores.CellBorderStyle = DataGridViewCellBorderStyle.None; // ซ่อนเส้นตารางเพื่อให้ดูคลีนที่สุด
             dgvScores.RowHeadersVisible = false;
             dgvScores.ReadOnly = true;
             dgvScores.ScrollBars = ScrollBars.Vertical;
+            dgvScores.EnableHeadersVisualStyles = false;
+
+            // ปรับแต่งสีและฟอนต์หัวตาราง (Header) ให้ดูเบาสบาย
+            dgvScores.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(253, 253, 253);
+            dgvScores.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(140, 140, 140);
+            dgvScores.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            dgvScores.ColumnHeadersDefaultCellStyle.Padding = new Padding(0, 5, 0, 5);
+            dgvScores.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+
+            // ปรับแต่งสีและฟอนต์ข้อมูลในแถว (Rows)
+            dgvScores.DefaultCellStyle.BackColor = Color.FromArgb(253, 253, 253);
+            dgvScores.DefaultCellStyle.ForeColor = Color.FromArgb(60, 60, 60);
+            dgvScores.DefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Regular);
+            dgvScores.DefaultCellStyle.SelectionBackColor = Color.FromArgb(245, 245, 245);
+            dgvScores.DefaultCellStyle.SelectionForeColor = Color.FromArgb(40, 40, 40);
+            dgvScores.DefaultCellStyle.Padding = new Padding(0, 8, 0, 8);
+            dgvScores.RowTemplate.Height = 35;
+
             this.Controls.Add(dgvScores);
 
             LoadScoreData("TODAY");
@@ -184,19 +209,18 @@ namespace Sec2_Group1_HappyJumpingFrog
 
                         if (passFilter)
                         {
-                            // ยังไม่ใส่ Rank ตอนนี้ เดี๋ยวมาจัดเรียงและใส่ทีหลัง
                             dt.Rows.Add(0, playerName, score, dateStr);
                         }
                     }
                 }
             }
 
-            // --- [จุดที่แก้ไข] จัดเรียงข้อมูลใน DataTable ให้คะแนนมากที่สุดขึ้นก่อน (Score DESC) ---
+            // จัดเรียงข้อมูลใน DataTable ให้คะแนนมากที่สุดขึ้นก่อน (Score DESC)
             DataView dv = dt.DefaultView;
             dv.Sort = "Score DESC";
             DataTable sortedDt = dv.ToTable();
 
-            // กำหนดเลข Rank ใหม่ตามลำดับคะแนนที่เรียงแล้ว (1, 2, 3, ...)
+            // กำหนดเลข Rank ใหม่ตามลำดับคะแนนที่เรียงแล้ว
             for (int i = 0; i < sortedDt.Rows.Count; i++)
             {
                 sortedDt.Rows[i]["Rank"] = i + 1;
@@ -205,10 +229,9 @@ namespace Sec2_Group1_HappyJumpingFrog
             dgvScores.DataSource = sortedDt;
 
             dgvScores.Columns["Rank"].FillWeight = 15;
-            dgvScores.Columns["Player"].FillWeight = 40;
+            dgvScores.Columns["Player"].FillWeight = 45;
             dgvScores.Columns["Score"].FillWeight = 20;
-            dgvScores.Columns["Date"].FillWeight = 35;
+            dgvScores.Columns["Date"].FillWeight = 30;
         }
     }
 }
-
