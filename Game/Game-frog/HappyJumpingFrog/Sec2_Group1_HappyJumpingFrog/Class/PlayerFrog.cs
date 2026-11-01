@@ -9,7 +9,7 @@ namespace HappyJumpingFrog
     public class PlayerFrog : GameObject
     {
         // แถวเริ่มต้น (ด่าน 1-2)
-        public static readonly float[] DefaultRows = { 590, 513, 451, 389, 334, 270, 200, 130, 50 };
+        public static readonly float[] DefaultRows = { 617, 590, 513, 451, 389, 334, 270, 200, 130, 50 };
 
         // แถวที่กบกระโดดไปได้ เปลี่ยนได้ตามด่าน
         public float[] RowCenters { get; set; } = DefaultRows;
@@ -76,7 +76,7 @@ namespace HappyJumpingFrog
 
             // วาร์ปกบกลับจุดเกิดทันที
             this.X = 350f;
-            this.Y = 565f;
+            this.Y = 600f;
 
             // ตั้งเวลาให้อมตะเป็นเวลา 1 วินาที
             _invulnerableUntil = DateTime.Now.AddSeconds(1);

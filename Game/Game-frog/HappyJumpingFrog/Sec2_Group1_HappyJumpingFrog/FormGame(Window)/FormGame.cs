@@ -44,6 +44,7 @@ namespace Sec2_Group1_HappyJumpingFrog
 
         private static readonly float[] RowsLevel3 =
         {
+            617,
             RoadTopLevel3 + 3.5f * LaneHeightLevel3,   // เลนล่างสุด
             RoadTopLevel3 + 2.5f * LaneHeightLevel3,
             RoadTopLevel3 + 1.5f * LaneHeightLevel3,
@@ -54,7 +55,8 @@ namespace Sec2_Group1_HappyJumpingFrog
 
         // จุดเริ่มต้นของกบ
         private const float StartX = 350;
-        private const float StartY = 565;
+        private const float StartY = 602;
+        private const float StartSafeCenterY = 605f;
 
         // ขนาดและตำแหน่งแนวตั้งของดอกบัว
         private const float LotusWidth = 110f;
@@ -419,7 +421,9 @@ namespace Sec2_Group1_HappyJumpingFrog
             _road?.Update();
 
             // 2. ตรวจจับการชนศัตรูบนถนน
-            if (!_frog.IsInvulnerable && _road != null && _road.CheckCollision(_frog))
+            bool inStartZone = (_frog.Y + _frog.Height / 2f) >= StartSafeCenterY;
+
+            if (!inStartZone && !_frog.IsInvulnerable && _road != null && _road.CheckCollision(_frog))
             {
                 _frog.Die();
                 _frog.X = StartX;
