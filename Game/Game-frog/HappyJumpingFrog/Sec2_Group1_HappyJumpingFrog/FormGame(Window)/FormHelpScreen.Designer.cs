@@ -29,46 +29,16 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormHelpScreen));
-            pictureHelp = new PictureBox();
-            label1 = new Label();
             btnBackformHelp = new Button();
-            tableLayoutPanel1 = new TableLayoutPanel();
+            pictureHelp = new PictureBox();
             panel1 = new Panel();
             label2 = new Label();
+            label1 = new Label();
+            tableLayoutPanel1 = new TableLayoutPanel();
             ((System.ComponentModel.ISupportInitialize)pictureHelp).BeginInit();
-            tableLayoutPanel1.SuspendLayout();
             panel1.SuspendLayout();
+            tableLayoutPanel1.SuspendLayout();
             SuspendLayout();
-            // 
-            // pictureHelp
-            // 
-            pictureHelp.BackColor = Color.Transparent;
-            pictureHelp.BackgroundImage = (Image)resources.GetObject("pictureHelp.BackgroundImage");
-            pictureHelp.BackgroundImageLayout = ImageLayout.Zoom;
-            pictureHelp.Cursor = Cursors.Cross;
-            pictureHelp.Dock = DockStyle.Fill;
-            pictureHelp.Location = new Point(3, 260);
-            pictureHelp.Name = "pictureHelp";
-            pictureHelp.Size = new Size(1823, 295);
-            pictureHelp.SizeMode = PictureBoxSizeMode.Zoom;
-            pictureHelp.TabIndex = 0;
-            pictureHelp.TabStop = false;
-            pictureHelp.Click += pictureHelp_Click;
-            // 
-            // label1
-            // 
-            label1.Anchor = AnchorStyles.None;
-            label1.AutoSize = true;
-            label1.BackColor = Color.Transparent;
-            label1.FlatStyle = FlatStyle.Flat;
-            label1.Font = new Font("Segoe UI", 36F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label1.ForeColor = Color.White;
-            label1.ImageAlign = ContentAlignment.TopCenter;
-            label1.Location = new Point(725, 4);
-            label1.Name = "label1";
-            label1.Size = new Size(378, 81);
-            label1.TabIndex = 1;
-            label1.Text = "How to play";
             // 
             // btnBackformHelp
             // 
@@ -90,26 +60,20 @@
             btnBackformHelp.UseVisualStyleBackColor = false;
             btnBackformHelp.Click += btnBackformHelp_Click;
             // 
-            // tableLayoutPanel1
+            // pictureHelp
             // 
-            tableLayoutPanel1.BackColor = Color.Transparent;
-            tableLayoutPanel1.ColumnCount = 1;
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tableLayoutPanel1.Controls.Add(label1, 0, 0);
-            tableLayoutPanel1.Controls.Add(panel1, 0, 1);
-            tableLayoutPanel1.Controls.Add(pictureHelp, 0, 2);
-            tableLayoutPanel1.Controls.Add(btnBackformHelp, 0, 3);
-            tableLayoutPanel1.Dock = DockStyle.Fill;
-            tableLayoutPanel1.Location = new Point(0, 0);
-            tableLayoutPanel1.Name = "tableLayoutPanel1";
-            tableLayoutPanel1.RowCount = 4;
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 90F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 167F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 150F));
-            tableLayoutPanel1.Size = new Size(1829, 708);
-            tableLayoutPanel1.TabIndex = 3;
-            tableLayoutPanel1.Paint += tableLayoutPanel1_Paint;
+            pictureHelp.BackColor = Color.Transparent;
+            pictureHelp.BackgroundImage = (Image)resources.GetObject("pictureHelp.BackgroundImage");
+            pictureHelp.BackgroundImageLayout = ImageLayout.Zoom;
+            pictureHelp.Cursor = Cursors.Cross;
+            pictureHelp.Dock = DockStyle.Fill;
+            pictureHelp.Location = new Point(3, 260);
+            pictureHelp.Name = "pictureHelp";
+            pictureHelp.Size = new Size(1823, 295);
+            pictureHelp.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureHelp.TabIndex = 0;
+            pictureHelp.TabStop = false;
+            pictureHelp.Click += pictureHelp_Click;
             // 
             // panel1
             // 
@@ -134,9 +98,45 @@
             label2.Name = "label2";
             label2.Size = new Size(1394, 90);
             label2.TabIndex = 4;
-            label2.Text = "Get your frog safely across the road by don't let's it hits anybody on the road and your frog must stays on lotus leaf to cross the river to the other side.\r\n";
+            label2.Text = "Get your frog safely across the road by don't let's it hits anybody on the road and your frog must stays on lotus leaf to complete the game.";
             label2.TextAlign = ContentAlignment.MiddleCenter;
             label2.Click += label2_Click;
+            // 
+            // label1
+            // 
+            label1.Anchor = AnchorStyles.None;
+            label1.AutoSize = true;
+            label1.BackColor = Color.Transparent;
+            label1.FlatStyle = FlatStyle.Flat;
+            label1.Font = new Font("Segoe UI", 36F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label1.ForeColor = Color.White;
+            label1.ImageAlign = ContentAlignment.TopCenter;
+            label1.Location = new Point(725, 4);
+            label1.Name = "label1";
+            label1.Size = new Size(378, 81);
+            label1.TabIndex = 1;
+            label1.Text = "How to play";
+            // 
+            // tableLayoutPanel1
+            // 
+            tableLayoutPanel1.BackColor = Color.Transparent;
+            tableLayoutPanel1.ColumnCount = 1;
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tableLayoutPanel1.Controls.Add(label1, 0, 0);
+            tableLayoutPanel1.Controls.Add(panel1, 0, 1);
+            tableLayoutPanel1.Controls.Add(pictureHelp, 0, 2);
+            tableLayoutPanel1.Controls.Add(btnBackformHelp, 0, 3);
+            tableLayoutPanel1.Dock = DockStyle.Fill;
+            tableLayoutPanel1.Location = new Point(0, 0);
+            tableLayoutPanel1.Name = "tableLayoutPanel1";
+            tableLayoutPanel1.RowCount = 4;
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 90F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 167F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 150F));
+            tableLayoutPanel1.Size = new Size(1829, 708);
+            tableLayoutPanel1.TabIndex = 3;
+            tableLayoutPanel1.Paint += tableLayoutPanel1_Paint;
             // 
             // FormHelpScreen
             // 
@@ -153,19 +153,19 @@
             Text = "FormHelpScreen";
             Load += FormHelpScreen_Load;
             ((System.ComponentModel.ISupportInitialize)pictureHelp).EndInit();
+            panel1.ResumeLayout(false);
             tableLayoutPanel1.ResumeLayout(false);
             tableLayoutPanel1.PerformLayout();
-            panel1.ResumeLayout(false);
             ResumeLayout(false);
         }
 
         #endregion
 
-        private PictureBox pictureHelp;
-        private Label label1;
         private Button btnBackformHelp;
-        private TableLayoutPanel tableLayoutPanel1;
+        private PictureBox pictureHelp;
         private Panel panel1;
         private Label label2;
+        private Label label1;
+        private TableLayoutPanel tableLayoutPanel1;
     }
 }

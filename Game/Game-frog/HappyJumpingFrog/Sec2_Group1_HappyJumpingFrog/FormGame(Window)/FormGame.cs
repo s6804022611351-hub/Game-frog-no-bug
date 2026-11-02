@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
+using Sec2_Group1_HappyJumpingFrog.Congratulations;
 
 
 namespace Sec2_Group1_HappyJumpingFrog
@@ -646,8 +647,16 @@ namespace Sec2_Group1_HappyJumpingFrog
 
             if (_level >= 3)
             {
-                GameDialog.Ask(this, "YOU WIN!", "ยินดีด้วย! คุณผ่านครบทั้ง 3 ด่านแล้ว", "MENU");
-                ReturnToMenu();
+                SoundManager.StopBgm();
+
+                this.Hide();
+
+                FormCongrat congratForm = new FormCongrat(_score);
+                congratForm.ShowDialog();
+
+                _closingByCode = true;
+                this.Close();
+
                 return;
             }
 
