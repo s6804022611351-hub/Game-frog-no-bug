@@ -646,32 +646,20 @@ namespace Sec2_Group1_HappyJumpingFrog
 
             if (_level >= 3)
             {
-                MessageBox.Show(
-                    "🎉 Congratulations! คุณผ่านครบทั้ง 3 ด่านเรียบร้อยแล้ว!",
-                    "You Win!",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information
-                );
-
+                GameDialog.Ask(this, "YOU WIN!", "ยินดีด้วย! คุณผ่านครบทั้ง 3 ด่านแล้ว", "MENU");
                 ReturnToMenu();
                 return;
             }
 
-            DialogResult result = MessageBox.Show(
-                $"🎉 คุณผ่านด่านที่ {_level} เรียบร้อยแล้ว!\n\nต้องการเล่นด่านที่ {_level + 1} ต่อหรือไม่?",
-                "Level Cleared",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Information
-            );
+            bool playNext = GameDialog.Ask(
+                this,
+                "LEVEL " + _level + " CLEARED!",
+                "ต้องการเล่นด่านที่ " + (_level + 1) + " ต่อหรือไม่?",
+                "NEXT LEVEL",
+                "MENU");
 
-            if (result == DialogResult.Yes)
-            {
-                StartNextLevel();
-            }
-            else
-            {
-                ReturnToMenu();
-            }
+            if (playNext) StartNextLevel();
+            else ReturnToMenu();
         }
 
         private void ReturnToMenu()
