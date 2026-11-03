@@ -278,9 +278,9 @@ namespace Sec2_Group1_HappyJumpingFrog
             DrawCenteredText(g, "Time:", _titleFont, cx, 315);
             DrawCenteredText(g, _gameTimer.TimeText, _valueFont, cx, 348);
 
-            DrawButton(g, ButtonRect(0), _paused ? ">" : "II", true);
-            DrawButton(g, ButtonRect(1), "SFX", _soundOn);
-            DrawButton(g, ButtonRect(2), "BGM", _musicOn);
+            DrawButton(g, ButtonRect(0), _paused ? "play" : "pause", true);
+            DrawButton(g, ButtonRect(1), "sfx", _soundOn);
+            DrawButton(g, ButtonRect(2), "bgm", _musicOn);
         }
 
         private RectangleF ButtonRect(int index)
@@ -289,7 +289,7 @@ namespace Sec2_Group1_HappyJumpingFrog
             return new RectangleF(x, 410 + index * 75, ButtonSize, ButtonSize);
         }
 
-        private void DrawButton(Graphics g, RectangleF r, string text, bool active)
+        private void DrawButton(Graphics g, RectangleF r, string icon, bool active)
         {
             using (SolidBrush fill = new SolidBrush(Color.FromArgb(110, 190, 50)))
             using (Pen edge = new Pen(Color.FromArgb(50, 110, 20), 4))
@@ -297,13 +297,71 @@ namespace Sec2_Group1_HappyJumpingFrog
                 g.FillEllipse(fill, r);
                 g.DrawEllipse(edge, r);
             }
-            DrawCenteredText(g, text, _smallFont, r.X + r.Width / 2f, r.Y + r.Height / 2f - 9);
+
+            DrawIcon(g, icon, r, 1.5f, Color.Black);   // เงา
+            DrawIcon(g, icon, r, 0f, Color.White);     // ตัวไอคอน
 
             if (!active)
             {
                 using (Pen slash = new Pen(Color.Red, 5))
                 {
                     g.DrawLine(slash, r.Left + 10, r.Bottom - 10, r.Right - 10, r.Top + 10);
+                }
+            }
+        }
+
+        private void DrawIcon(Graphics g, string icon, RectangleF r, float offset, Color color)
+        {
+            float cx = r.X + r.Width / 2f + offset;
+            float cy = r.Y + r.Height / 2f + offset;
+            float u = r.Width / 64f;   // หน่วยย่อยตามขนาดปุ่ม
+
+            using (SolidBrush br = new SolidBrush(color))
+            using (Pen pen = new Pen(color, 3.5f * u)
+            {
+                StartCap = LineCap.Round,
+                EndCap = LineCap.Round
+            })
+            {
+                switch (icon)
+                {
+                    case "pause":
+                        g.FillRectangle(br, cx - 13 * u, cy - 13 * u, 10 * u, 26 * u);
+                        g.FillRectangle(br, cx + 3 * u, cy - 13 * u, 10 * u, 26 * u);
+                        break;
+
+                    case "play":
+                        g.FillPolygon(br, new PointF[]
+                        {
+                    new PointF(cx - 9 * u, cy - 14 * u),
+                    new PointF(cx - 9 * u, cy + 14 * u),
+                    new PointF(cx + 15 * u, cy)
+                        });
+                        break;
+
+                    case "sfx":   // ลำโพง + คลื่นเสียง
+                        g.FillPolygon(br, new PointF[]
+                        {
+                    new PointF(cx - 16 * u, cy - 6 * u),
+                    new PointF(cx - 9 * u,  cy - 6 * u),
+                    new PointF(cx - 1 * u,  cy - 14 * u),
+                    new PointF(cx - 1 * u,  cy + 14 * u),
+                    new PointF(cx - 9 * u,  cy + 6 * u),
+                    new PointF(cx - 16 * u, cy + 6 * u)
+                        });
+                        g.DrawArc(pen, cx + 1 * u - 9 * u, cy - 9 * u, 18 * u, 18 * u, -45, 90);
+                        g.DrawArc(pen, cx + 1 * u - 16 * u, cy - 16 * u, 32 * u, 32 * u, -45, 90);
+                        break;
+
+                    case "bgm":   // โน้ตดนตรี
+                        g.FillEllipse(br, cx - 12 * u, cy + 5 * u, 14 * u, 10 * u);
+                        g.DrawLine(pen, cx + 1 * u, cy + 9 * u, cx + 1 * u, cy - 14 * u);
+                        g.DrawBezier(pen,
+                            cx + 1 * u, cy - 14 * u,
+                            cx + 3 * u, cy - 8 * u,
+                            cx + 13 * u, cy - 10 * u,
+                            cx + 11 * u, cy + 0 * u);
+                        break;
                 }
             }
         }
