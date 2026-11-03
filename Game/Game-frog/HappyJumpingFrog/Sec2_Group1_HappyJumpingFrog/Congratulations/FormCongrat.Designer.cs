@@ -80,6 +80,7 @@
             Name = "FormCongrat";
             Text = "Classic Frog";
             WindowState = FormWindowState.Maximized;
+            Load += FormCongrat_Load;
             ResumeLayout(false);
         }
 

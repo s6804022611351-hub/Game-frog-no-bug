@@ -12,19 +12,30 @@ namespace Sec2_Group1_HappyJumpingFrog.Congratulations
 {
     public partial class FormCongrat : Form
     {
+        private int currentScore;
+
         public FormCongrat()
         {
             InitializeComponent();
         }
-        public FormCongrat(int score)
+
+        public FormCongrat(int score) : this()
         {
             currentScore = score;
         }
-        private int currentScore;
 
-
+        // ปุ่ม End Game -> กลับหน้าเมนู
         private void button1_Click_2(object sender, EventArgs e)
         {
+            foreach (Form f in Application.OpenForms)
+            {
+                if (f is FormMenu)
+                {
+                    f.Show();
+                    f.Activate();
+                    break;
+                }
+            }
             this.Close();
         }
 
@@ -32,6 +43,11 @@ namespace Sec2_Group1_HappyJumpingFrog.Congratulations
         {
             FormSubmitScore submitForm = new FormSubmitScore(currentScore);
             submitForm.ShowDialog(this);
+        }
+
+        private void FormCongrat_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

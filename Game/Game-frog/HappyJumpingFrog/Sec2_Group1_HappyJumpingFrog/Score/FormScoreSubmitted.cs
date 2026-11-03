@@ -13,6 +13,7 @@ namespace Sec2_Group1_HappyJumpingFrog
 {
     public partial class FormScoreSubmitted : Form
     {
+
         private string _playerName = "";
         private int _score = 0;
 
@@ -37,6 +38,11 @@ namespace Sec2_Group1_HappyJumpingFrog
         private void btnclose_Click(object sender, EventArgs e)
         {
             Close();
+        }
+
+        private void FormScoreSubmitted_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
