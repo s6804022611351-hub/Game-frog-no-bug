@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace Sec2_Group1_HappyJumpingFrog
 {
@@ -76,10 +77,23 @@ namespace Sec2_Group1_HappyJumpingFrog
         {
             if (_cache.TryGetValue(name, out CachedSound cached)) return cached;
 
+            // 1) โหลดจากไฟล์เสียงที่ฝังอยู่ใน exe (Embedded Resource) ก่อน
+            try
+            {
+                CachedSound embedded = LoadEmbedded(name);
+                if (embedded != null)
+                {
+                    _cache[name] = embedded;
+                    return embedded;
+                }
+            }
+            catch { /* ถ้าอ่านไม่ได้ ไปลองโฟลเดอร์ต่อ */ }
+
+            // 2) ไม่เจอ -> ลองโฟลเดอร์ Sounds ข้างไฟล์ exe
             string dir = Path.Combine(AppContext.BaseDirectory, "Sounds");
             if (!Directory.Exists(dir))
             {
-                Warn("ไม่พบโฟลเดอร์:\n" + dir);
+                Warn("ไม่พบเสียง '" + name + "' ทั้งใน exe และโฟลเดอร์:\n" + dir);
                 return null;
             }
 
@@ -93,6 +107,23 @@ namespace Sec2_Group1_HappyJumpingFrog
             var sound = new CachedSound(path);
             _cache[name] = sound;
             return sound;
+        }
+
+        // หาไฟล์ที่ฝังไว้ เช่น "Sec2_Group1_HappyJumpingFrog.Sounds.jump.wav"
+        private static CachedSound LoadEmbedded(string name)
+        {
+            Assembly asm = Assembly.GetExecutingAssembly();
+            string key = ".Sounds." + name + ".";
+
+            string resName = asm.GetManifestResourceNames()
+                .FirstOrDefault(n => n.IndexOf(key, StringComparison.OrdinalIgnoreCase) >= 0);
+            if (resName == null) return null;
+
+            using (Stream s = asm.GetManifestResourceStream(resName))
+            {
+                if (s == null) return null;
+                return new CachedSound(s, Path.GetExtension(resName));
+            }
         }
 
         public static void PlaySfx(string name)
@@ -113,6 +144,12 @@ namespace Sec2_Group1_HappyJumpingFrog
             }
         }
 
+        // เมธอดเดิมจากโค้ดอีกตัว (เรียกด้วยชื่อไฟล์ เช่น "jump.wav" ก็ได้)
+        public static void PlaySound(string soundFileName)
+        {
+            PlaySfx(Path.GetFileNameWithoutExtension(soundFileName));
+        }
+
         // แจ้งเตือนครั้งเดียวพอ ไม่ให้เด้งทุกครั้งที่กระโดด
         private static void Warn(string msg)
         {
@@ -129,26 +166,43 @@ namespace Sec2_Group1_HappyJumpingFrog
 
         public float[] AudioData { get; }
 
+        // โหลดจากไฟล์ในโฟลเดอร์
         public CachedSound(string path)
         {
             using (var reader = new AudioFileReader(path))
+                AudioData = ReadAll(reader);
+        }
+
+        // โหลดจากไฟล์ที่ฝังใน exe (แนะนำให้เป็น .wav)
+        public CachedSound(Stream stream, string extension)
+        {
+            if (string.Equals(extension, ".wav", StringComparison.OrdinalIgnoreCase))
             {
-                ISampleProvider sp = reader;
-
-                if (sp.WaveFormat.SampleRate != Format.SampleRate)
-                    sp = new WdlResamplingSampleProvider(sp, Format.SampleRate);
-
-                if (sp.WaveFormat.Channels == 1)
-                    sp = new MonoToStereoSampleProvider(sp);
-
-                var data = new List<float>();
-                var buffer = new float[Format.SampleRate * Format.Channels];
-                int read;
-                while ((read = sp.Read(buffer, 0, buffer.Length)) > 0)
-                    data.AddRange(buffer.Take(read));
-
-                AudioData = data.ToArray();
+                using (var reader = new WaveFileReader(stream))
+                    AudioData = ReadAll(reader.ToSampleProvider());
             }
+            else
+            {
+                using (var reader = new StreamMediaFoundationReader(stream))
+                    AudioData = ReadAll(reader.ToSampleProvider());
+            }
+        }
+
+        private static float[] ReadAll(ISampleProvider sp)
+        {
+            if (sp.WaveFormat.SampleRate != Format.SampleRate)
+                sp = new WdlResamplingSampleProvider(sp, Format.SampleRate);
+
+            if (sp.WaveFormat.Channels == 1)
+                sp = new MonoToStereoSampleProvider(sp);
+
+            var data = new List<float>();
+            var buffer = new float[Format.SampleRate * Format.Channels];
+            int read;
+            while ((read = sp.Read(buffer, 0, buffer.Length)) > 0)
+                data.AddRange(buffer.Take(read));
+
+            return data.ToArray();
         }
     }
 
